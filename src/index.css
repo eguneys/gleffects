@@ -1,0 +1,5 @@
+#app canvas {
+  transform-origin: 0px 0px;
+  transform-style: preserve-3d;
+  image-rendering: auto;
+}
