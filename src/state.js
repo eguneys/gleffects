@@ -1,7 +1,7 @@
 
 export default function defaults() {
 
-  const width = 384,
+  const width = 256,
         height = 256,
         ratio = height / width;
 

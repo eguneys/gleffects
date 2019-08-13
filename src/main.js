@@ -1,6 +1,6 @@
 import defaults from './state';
 
-import view from './view';
+import makeView from './view';
 import makeCtrl from './ctrl';
 import Loop from './loop';
 
@@ -16,9 +16,11 @@ export function app(element, options) {
 
   let ctrl = new makeCtrl(state, ctx);
 
+  let view = new makeView(state, ctx);
+
   new Loop(delta => {
     ctrl.update(delta);
-    view(ctrl);
+    view.render(ctrl);
   }).start();
 
   canvas.width = state.game.width;
@@ -28,8 +30,6 @@ export function app(element, options) {
   if (module.hot) {
     module.hot.accept('./ctrl', function() {
       try {
-        console.log('here');
-
         ctrl = new makeCtrl(state, ctx);
       } catch (e) {
         console.log(e);
@@ -37,6 +37,7 @@ export function app(element, options) {
     });
     module.hot.accept('./view', function() {
       try {
+        view = new makeView(state, ctx);
       } catch (e) {
         console.log(e);
       }
