@@ -5,9 +5,29 @@ export default function view(state, ctx) {
   const halfw = width / 2,
         halfh = height / 2;
 
+  const screen = 0x00000,
+        page1 = 0x10000,
+        page2 = 0x20000,
+        page3 = 0x30000,
+        page4 = 0x40000,
+        page5 = 0x50000,
+        page6 = 0x60000,
+        page7 = 0x70000;
+        
+
   const colors = [0xff000000, 0xff342022, 0xff3c2845, 0xff313966, 0xff3b568f, 0xff2671df, 0xff66a0d9, 0xff9ac3ee, 0xff36f2fb, 0xff50e599, 0xff30be6a, 0xff6e9437, 0xff2f694b, 0xff244b52, 0xff393c32, 0xff743f3f, 0xff826030, 0xffe16e5b, 0xffff9b63, 0xffe4cd5f, 0xfffcdbcb, 0xffffffff, 0xffb7ad9b, 0xff877e84, 0xff6a6a69, 0xff525659, 0xff8a4276, 0xff3232ac, 0xff6357d9, 0xffba7bd7, 0xff4a978f, 0xff306f8a];
 
-  
+  const palDefault = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
+
+  const twoColorPalette = [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1];
+  const warmPalette = [14,0,14,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7];
+
+
+  let pal = palDefault;
+
+  let renderTarget = screen,
+      renderSource = page1;
+
 
   const imageData = ctx.getImageData(0, 0, width, height);
 
@@ -15,11 +35,31 @@ export default function view(state, ctx) {
   let buf8 = new Uint8ClampedArray(buf);
   let data = new Uint32Array(buf);
 
-  let screen = new Uint8ClampedArray(imageData.data.length);
+  let ram = new Uint8ClampedArray(0x80000);
+
 
   const pset = (x, y, color) => {
-    screen[y * width + x] = color;
+    ram[renderTarget + y * width + x] = color;
   };
+
+  const spr = (sx = 0, sy = 0, sw = 16, sh = 16, x=0, y=0, flipx = false, flipy = false) => {
+    
+    for (let i = 0; i < sh; i++) {
+      for (let j = 0; j < sw; j++) {
+
+        if (!flipx & !flipy) {
+          let iTarget = renderTarget + ((y + i)*width+x+j),
+              iSource = renderSource + ((sy + i)*width+sx+j);
+
+          if (ram[iSource] > 0) {
+            ram[iTarget] = pal[ram[iSource]];
+          }
+        }
+      }
+    }
+
+  };
+
 
   const line = (x1, y1, x2, y2, color) => {
     let dy = y2 - y1,
@@ -38,6 +78,8 @@ export default function view(state, ctx) {
     }
     dy <<= 1;
     dx <<= 1;
+
+    pset(x1, y1, color);
 
     if (dx > dy) {
       fraction = dy - (dx >> 1);
@@ -98,43 +140,87 @@ export default function view(state, ctx) {
 
   const fillRect = (x1, y1, x2, y2, color) => {
     let i = Math.abs(y2 - y1);
-    //screen.fill(color, y1 * width + x1, y1 * width + x2);
 
-    while (--i) {
-      screen.fill(color, (y1 + i) * width + x1, (y1 + i)*width + x2);
+    line(x1, y1, x2, y1, color);
+
+    if (i > 0) {
+      while (--i) {
+        line(x1, y1 + i, x2, y1 + i, color);
+      }
     }
+    line(x1, y2, x2, y2, color);
+  };
 
-    //screen.fill(color, y2 * width + x1, y2 * width + x2);
+  const checker = (nRow, nCol, color) => {
+    let w = width,
+        h = height,
+        x = 0,
+        y = 0;
+
+    w /= nCol;
+    h /= nRow;
+
+    for (let i = 0; i < nRow; ++i) {
+      for (let j = 0, col = nCol / 2; j < col; ++j) {
+        x = 2 * j * w + (i % 2 ? 0 : w);
+        y = i * h;
+        fillRect(x, y, x + w, y + h, color);
+      }
+    }
   };
 
   this.render = () => {
-    let i = data.length;
+
+    iRender();
+
+    let i = 0x10000;
 
     while (i--) {
-      data[i] = colors[screen[i]];
+      data[i] = colors[pal[ram[i]]];
     }    
 
     imageData.data.set(buf8);
     ctx.putImageData(imageData, 0, 0);
+
+
   };
 
 
   (() => {
 
-    screen.fill(1, 0, screen.length);
-
-    let i = width - 1;
-    while (i--) {
-      line(0+i,0, width-1-i, height-1, i%31);
-      line(0,0+i, width-1,height-1-i, i%31);
-    }
-
-    for (let j = 0; j < 32; j++) {
-      fillRect(8 * j, 0, 8 * (j + 1), 12, j);
-
-      fillCircle(halfw, halfh, halfw/2-j, j);
-    }
+    renderTarget = page2;
+    fillRect(0, 0, width, height, 2);
+    checker(16, 16, 1);
 
   })();
+
+  function iRender() {
+    renderTarget = page1;
+    fillRect(0, 0, width, height, 0);
+    circle(halfw, halfh, 10, 21);
+
+    renderSource = page2;
+    renderTarget = page4;
+    spr(0, 0, width, height);
+
+
+    renderSource = page1;
+    renderTarget = page4;
+    spr(0, 0, width, height);
+
+    renderSource = page4;
+    renderTarget = screen;
+    spr(0, 0, width, height);
+
+
+    pal = warmPalette;
+    spr(halfw/2, halfh/2, halfw, halfh, halfw/2, halfh/2);
+
+    pal = twoColorPalette;
+    spr(0, 0, halfw / 2, halfh/2);
+    spr(0, halfh/2 * 3, halfw/2, width, 0, halfh/2*3);
+
+    pal = palDefault;
+  }
 
 }
