@@ -1,6 +1,7 @@
 var path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const devConfig = {
   mode: 'development',
@@ -51,22 +52,51 @@ const devConfig = {
 };
 
 const prodConfig = {
-  ...devConfig,
   entry: [
     path.resolve(__dirname, 'src') + '/boot.js'
   ],
   mode: 'production',
   output: {
-    path: path.resolve(__dirname, 'dist') + '/app',
     filename: 'bundle.js',
-    libraryTarget: 'umd'
-  }
+    libraryTarget: 'var',
+    library: 'Tetris',
+  },
+  devtool: 'none',
+  target: 'web',
+  module: {
+    rules: [
+      {
+        test: /\.js?$/,
+        use: 'babel-loader',
+        exclude: path.resolve(__dirname, './node_modules/')
+      },{
+        test: /\.(jpe?g|png|gif|svg|json)$/i,
+        use: 'file-loader'
+      },
+      {
+        test: /\.(frag?g|vert)$/i,
+        use: 'raw-loader'
+      },
+      {
+        test: /\.css?$/,
+        use: [{loader: MiniCssExtractPlugin.loader, options: {}}, 'css-loader'],
+        exclude: path.resolve(__dirname, './node_modules/')
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      inject: 'head'
+    }),
+    new MiniCssExtractPlugin({})
+  ]
 };
 
 module.exports = (env) => {
   switch (env) {
   case 'production':
-    return [devConfig, prodConfig];
+    return prodConfig;
   default:
     return devConfig;
   }

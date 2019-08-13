@@ -21,24 +21,8 @@ export function app(element, options) {
     view(ctrl);
   }).start();
 
-  const setScale = (state) => {
-    const { ratio, width, height } = state.game;
-    let scale;
-
-    if (window.innerWidth > window.innerHeight / ratio) {
-      scale = (window.innerHeight / ratio) / width;
-    } else {
-      scale = (window.innerWidth * ratio) / height;
-    }
-    state.game.scale = scale;
-
-
-    canvas.style.transform = `scale(${scale}, ${scale})`;
-  };
-
   canvas.width = state.game.width;
   canvas.height = state.game.height;
-  setScale(state);
   element.append(canvas);
 
   if (module.hot) {

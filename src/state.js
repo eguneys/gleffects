@@ -1,12 +1,12 @@
 
 export default function defaults() {
 
-  const width = 2560,
-        height = 1440,
+  const width = 384,
+        height = 256,
         ratio = height / width;
 
   const game = {
-    unit: 80,
+    unit: 30,
     width,
     height,
     ratio,
@@ -16,7 +16,7 @@ export default function defaults() {
   const hero = {
     radius: game.unit / 2,
     gap: 2,
-    gapMove: 8,
+    gapMove: 2,
     rotation: 0,
     tick: 0
   };
