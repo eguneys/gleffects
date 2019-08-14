@@ -14,12 +14,12 @@ export default function letters() {
 
 
 `,
-    'o': `
-     .
-
+    '/': `
+    .
    .
-
-
+  .
+ .
+.
 `,
     'x': `
 .   .

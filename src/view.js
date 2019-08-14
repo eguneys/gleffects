@@ -38,7 +38,7 @@ export default function view(ctrl, g) {
     text({
       x: 60,
       y: height - 20,
-      text: 'xs-ls',
+      text: 'xs-lso',
       color: 21,
       hspacing: 2,
       scale: 2
