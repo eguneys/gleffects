@@ -1,5 +1,6 @@
 import defaults from './state';
 
+import Graphics from './graphics';
 import makeView from './view';
 import makeCtrl from './ctrl';
 import Loop from './loop';
@@ -16,11 +17,13 @@ export function app(element, options) {
 
   let ctrl = new makeCtrl(state, ctx);
 
-  let view = new makeView(state, ctx);
+  let graphics = new Graphics(state, ctx);
+  let view = new makeView(ctrl, graphics);
 
   new Loop(delta => {
     ctrl.update(delta);
     view.render(ctrl);
+    graphics.render();
   }).start();
 
   canvas.width = state.game.width;
@@ -37,7 +40,7 @@ export function app(element, options) {
     });
     module.hot.accept('./view', function() {
       try {
-        view = new makeView(state, ctx);
+        view = new makeView(ctrl, graphics);
       } catch (e) {
         console.log(e);
       }

@@ -1,4 +1,3 @@
-
 export default function defaults() {
 
   const width = 256,
@@ -10,7 +9,8 @@ export default function defaults() {
     width,
     height,
     ratio,
-    vx: 10
+    vx: 10,
+    tick: 0
   };
 
   const hero = {

@@ -7,3 +7,7 @@ export const THIRDTAU = TAU / 3;
 export function rand(min, max) {
   return Math.random() * (max - min) + min;
 }
+
+export function clamp(v, min, max) {
+  return Math.min(Math.max(v, min), max);
+}
