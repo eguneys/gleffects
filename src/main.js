@@ -3,21 +3,20 @@ import defaults from './state';
 import Graphics from './graphics';
 import makeView from './view';
 import makeCtrl from './ctrl';
-import Loop from './loop';
+import Loop from 'loopz';
 
 export function app(element, options) {
 
-  const canvas = document.createElement('canvas');
-
-  const ctx = canvas.getContext('2d');
+  const canvas = document.createElement('canvas'),
+        gl = canvas.getContext('webgl2');
 
   const state = {
     ...defaults()
   };
 
-  let ctrl = new makeCtrl(state, ctx);
+  let graphics = new Graphics(state, gl);
 
-  let graphics = new Graphics(state, ctx);
+  let ctrl = new makeCtrl(state, graphics);
   let view = new makeView(ctrl, graphics);
 
   new Loop(delta => {
