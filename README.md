@@ -1,6 +1,18 @@
+### Usage
+
+    yarn install
+    yarn start
+
+This will run `webpack-dev-server` and bundle your code, now visit: `localhost:3000` to see the result.
+
+    
 ### Notes
 
-Main Setup
+Follow along by cloning this repo https://github.com/eguneys/gleffects.
+
+Our main setup is this fragment shader;
+
+`src/shaders/main.frag`
 
 ```glsl
 
@@ -35,13 +47,13 @@ Main Setup
 
 ```
 
-`gl_FragCoord.xy` returns the pixels x,y coordinate in screen space [screen width, screen height].
+`gl_FragCoord.xy` returns the pixels x,y coordinate in screen space `[screen width, screen height]`.
 
-`screenToWorld` converts screen space to world space, in this case converts [screen width, screen height] to [-1, 1] range.
+`screenToWorld` converts screen space to world space, in this case converts `[screen width, screen height]` to `[-1, 1]` range.
 
-Now, we have a point `sd` in world space, we pass it to our signed distance function `sdf` and it's output to `shade` function to finally return a color. `sdf` returns a float in the [-1,1] range, and `shade` function returns a color, when combined for all pixel in the screen will make the shape visible.
+Now, we have a point `sd` in world space, we pass it to our signed distance function `sdf` and it's output to `shade` function to finally return a color. `sdf` returns a float in the `[-1,1]` range, and `shade` function returns a color, when combined for all pixel in the screen will make the shape visible.
 
-`shade` function just takes a float `sd` and does an `abs(sd)` this will map [-1, 1] to [1,1] with 0 in the middle. For [-1,1] range, this would return white on the edges, and black in the middle because 0 is color black, and everything in between interpolated. Now we later use `smoothstep(0.0, 0.01, abs(sd))` which will only interpolate when the `abs(sd)` is in the range 0.0 and 0.01, and return between range [0 and 1]. For example it will return outputs like these:
+`shade` function just takes a float `sd` and does an `abs(sd)` this will map `[-1, 1]` to `[1,1]` with 0 in the middle. For `[-1,1]` range, this would return white on the edges, and black in the middle because 0 is color black, and everything in between interpolated. Now we later use `smoothstep(0.0, 0.01, abs(sd))` which will only interpolate when the `abs(sd)` is in the range 0.0 and 0.01, and return between range `[0, 1]`. For example it will return outputs like these:
 
 ```
 abs(sd)  0.0  0.005 0.01 0.02 0.9 1.0
@@ -57,6 +69,7 @@ Now, our goal is to map point `p` (`vec2` in `[-1,1]` range), to a `float` in `[
 ### References
 
 [The Book Of Shaders](https://thebookofshaders.com/)
+
 [Raymarching Workshop](https://github.com/ajweeks/RaymarchingWorkshop)
 
 

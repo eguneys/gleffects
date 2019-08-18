@@ -1,10 +1,7 @@
-import makeColors from './colors';
-import makeHero from './hero';
-import makeSpark from './spark';
 import Pool from './pool';
 
-export default function ctrl(state, ctx) {
-  this.ctx = ctx;
+export default function ctrl(state, g) {
+
   this.data = state;
 
 
