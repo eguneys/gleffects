@@ -8,6 +8,9 @@ This will run `webpack-dev-server` and bundle your code, now visit: `localhost:3
     
 ### Notes
 
+
+#### Introduction
+
 Follow along by cloning this repo https://github.com/eguneys/gleffects.
 
 Our main setup is this fragment shader;
@@ -65,6 +68,40 @@ This means everything will be white except when the `abs(sd)` is close to 0. So 
 Now, our goal is to map point `p` (`vec2` in `[-1,1]` range), to a `float` in `[-1,1]` range, and if the point is an outline of the shape return 0 otherwise return non-zero.
 
 Try `p.x`, this will return 0 when x is 0, so that's a vertical line passing thru origin. You can try `p.x + .8` that shifts the line by .8 ratio. Similarly `p.y` returns a horizontal line.
+
+Try `length(p)`. `length` returns the distance of the point to the origin. That is 0 on the origin and non-zero otherwise, that means all white except the origin.
+
+Try `length(p) - 0.5`. When the distance to origin is 0.5 it will return 0 otherwise non-zero, that is a circle with radius 0.5.
+
+Try `length(p - vec2(0.0, 0.5)) - 0.5`. This will translate the circle by given vector. Now we can make a function to draw circle:
+
+    float sdCircle(vec2 p, vec2 t, float r) {
+      return length(p - t) - r;
+    }
+
+
+#### Combining Shapes
+
+Now to combine shapes, and render multiple shapes, we use this technique:
+
+    float sdf(vec2 p) {
+      float d = 1000.0;
+
+      d = min(d, sdCircle(p, vec2(0.9, 0.5), 0.1));
+      d = min(d, sdCircle(p, vec2(1.0, 0.0), 0.5));
+
+      return d;
+    }
+
+### Filling the shape
+
+`sdCircle` returns 0 on the outline; negative on the inside and positive on the outside of the circle. We can use this fact to fill the circle.
+
+    vec3 shadeFill(float sd) {
+      vec3 col = vec3(smoothstep(0.0, 0.01, sd));
+      return col;
+    }
+
 
 
 ### References
