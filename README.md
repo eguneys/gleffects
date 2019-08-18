@@ -51,7 +51,7 @@ Our main setup is this fragment shader;
 
 `screenToWorld` converts screen space to world space, in this case converts `[screen width, screen height]` to `[-1, 1]` range.
 
-Now, we have a point `sd` in world space, we pass it to our signed distance function `sdf` and it's output to `shade` function to finally return a color. `sdf` returns a float in the `[-1,1]` range, and `shade` function returns a color, when combined for all pixel in the screen will make the shape visible.
+Now, we have a point `sd` in world space, we pass it to our signed distance function `sdf` and it's output to `shade` function to finally return a color. `sdf` returns a float in the `[-1,1]` range, and `shade` function returns a color, when combined for all pixels in the screen will make the shape visible.
 
 `shade` function just takes a float `sd` and does an `abs(sd)` this will map `[-1, 1]` to `[1,1]` with 0 in the middle. For `[-1,1]` range, this would return white on the edges, and black in the middle because 0 is color black, and everything in between interpolated. Now we later use `smoothstep(0.0, 0.01, abs(sd))` which will only interpolate when the `abs(sd)` is in the range 0.0 and 0.01, and return between range `[0, 1]`. For example it will return outputs like these:
 
@@ -64,6 +64,7 @@ This means everything will be white except when the `abs(sd)` is close to 0. So 
 
 Now, our goal is to map point `p` (`vec2` in `[-1,1]` range), to a `float` in `[-1,1]` range, and if the point is an outline of the shape return 0 otherwise return non-zero.
 
+Try `p.x`, this will return 0 when x is 0, so that's a vertical line passing thru origin. You can try `p.x + .8` that shifts the line by .8 ratio. Similarly `p.y` returns a horizontal line.
 
 
 ### References

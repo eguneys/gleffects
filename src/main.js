@@ -9,9 +9,16 @@ export function app(element, options) {
 
   const canvas = document.createElement('canvas'),
         gl = canvas.getContext('webgl2');
+  element.append(canvas);
+  const displayWidth = canvas.clientWidth,
+        displayHeight = canvas.clientHeight;
+  canvas.width = displayWidth;
+  canvas.height = displayHeight;
+
+
 
   const state = {
-    ...defaults()
+    ...defaults(displayWidth, displayHeight)
   };
 
   let graphics = new Graphics(state, gl);
@@ -25,9 +32,6 @@ export function app(element, options) {
     graphics.render();
   }).start();
 
-  canvas.width = state.game.width;
-  canvas.height = state.game.height;
-  element.append(canvas);
 
   if (module.hot) {
     module.hot.accept('./ctrl', function() {

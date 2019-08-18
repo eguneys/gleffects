@@ -8,7 +8,7 @@ out vec4 outColor;
 
 
 float sdf(vec2 p) {
-  return p.x;
+  return length(p) - 1.0;
 }
 
 vec3 shade(float sd) {

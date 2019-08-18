@@ -1,8 +1,6 @@
-export default function defaults() {
+export default function defaults(width, height) {
 
-  const width = 1024,
-        height = 1024,
-        ratio = height / width;
+  const ratio = height / width;
 
   const game = {
     unit: 30,
