@@ -6,6 +6,13 @@ uniform vec2 u_resolution;
 
 out vec4 outColor;
 
+float sdLine( in vec2 p, in vec2 a, in vec2 b )
+{
+    vec2 pa = p-a, ba = b-a;
+    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    return length( pa - ba*h );
+}
+
 float sdCircle(vec2 p, vec2 t, float r) {
   return length(p - t) - r;
 }
@@ -15,6 +22,7 @@ float sdf(vec2 p) {
 
   d = min(d, sdCircle(p, vec2(0.9, 0.5), 0.1));
   d = min(d, sdCircle(p, vec2(1.0, 0.0), 0.5));
+  d = min(d, sdLine(p, vec2(0.0, 0.0), vec2(0.0, 0.5)) - 0.01);
 
   return d;
 }

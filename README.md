@@ -54,9 +54,9 @@ Our main setup is this fragment shader;
 
 `screenToWorld` converts screen space to world space, in this case converts `[screen width, screen height]` to `[-1, 1]` range.
 
-Now, we have a point `sd` in world space, we pass it to our signed distance function `sdf` and it's output to `shade` function to finally return a color. `sdf` returns a float in the `[-1,1]` range, and `shade` function returns a color, when combined for all pixels in the screen will make the shape visible.
+Now, we have a point `sd` in world space, we pass it to our signed distance function `sdf`, and it's output to `shade` function to finally return a color. `sdf` returns a float in the `[-1,1]` range, and `shade` function returns a color, when combined for all pixels in the screen will make the shape visible.
 
-`shade` function just takes a float `sd` and does an `abs(sd)` this will map `[-1, 1]` to `[1,1]` with 0 in the middle. For `[-1,1]` range, this would return white on the edges, and black in the middle because 0 is color black, and everything in between interpolated. Now we later use `smoothstep(0.0, 0.01, abs(sd))` which will only interpolate when the `abs(sd)` is in the range 0.0 and 0.01, and return between range `[0, 1]`. For example it will return outputs like these:
+`shade` function just takes a float `sd` and does an `abs(sd)`. This will map `[-1, 1]` to `[1,1]` with 0 in the middle. For `[-1,1]` range, this would return white on the edges, and black in the middle because 0 is color black, and everything in between interpolated. Now we later use `smoothstep(0.0, 0.01, abs(sd))` which will only interpolate when the `abs(sd)` is in the range 0.0 and 0.01, and return between range `[0, 1]`. For example it will return outputs like these:
 
 ```
 abs(sd)  0.0  0.005 0.01 0.02 0.9 1.0
@@ -67,7 +67,7 @@ This means everything will be white except when the `abs(sd)` is close to 0. So 
 
 Now, our goal is to map point `p` (`vec2` in `[-1,1]` range), to a `float` in `[-1,1]` range, and if the point is an outline of the shape return 0 otherwise return non-zero.
 
-Try `p.x`, this will return 0 when x is 0, so that's a vertical line passing thru origin. You can try `p.x + .8` that shifts the line by .8 ratio. Similarly `p.y` returns a horizontal line.
+Try returning `p.x`, this will return 0 when x is 0, so that's a vertical line passing thru origin. You can try `p.x + .8` that shifts the line by .8 ratio. Similarly `p.y` returns a horizontal line.
 
 Try `length(p)`. `length` returns the distance of the point to the origin. That is 0 on the origin and non-zero otherwise, that means all white except the origin.
 
@@ -82,7 +82,7 @@ Try `length(p - vec2(0.0, 0.5)) - 0.5`. This will translate the circle by given 
 
 #### Combining Shapes
 
-Now to combine shapes, and render multiple shapes, we use this technique:
+To combine shapes, and render multiple shapes, we use this technique:
 
     float sdf(vec2 p) {
       float d = 1000.0;
@@ -103,11 +103,16 @@ Now to combine shapes, and render multiple shapes, we use this technique:
     }
 
 
+### More shapes and extra
+
+Go discover now: http://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 
 ### References
 
+[Raymarching Workshop](https://github.com/ajweeks/RaymarchingWorkshop)
+
 [The Book Of Shaders](https://thebookofshaders.com/)
 
-[Raymarching Workshop](https://github.com/ajweeks/RaymarchingWorkshop)
+[WebGL2 Fundamentals](https://webgl2fundamentals.org)
 
 
