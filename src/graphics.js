@@ -1,11 +1,71 @@
 import * as u from './util';
 
+import mat3 from './matrix';
+
 import vShaderSource from './shaders/main.vert';
 import fShaderSource from './shaders/main.frag';
 
 export default function Graphics(state, gl) {
 
   const { width, height } = state.game;
+
+  gl.clearColor(0, 0, 0, 0);
+
+
+  this.minibatch = [];
+
+  let quad = makeQuad(gl);
+
+  this.addQuad = (uniformArgs) => {
+
+    const cookUniforms = Object.keys(quad.uniforms).map(key => {
+      let setter = quad.uniforms[key];
+      let args = uniformArgs[key];
+      return () => setter(...args);
+    });
+    this.minibatch.push({...quad, uniforms: cookUniforms });
+  };
+
+  this.quad = (translation, rotation) => {
+
+    let matrix = mat3.identity();
+    matrix = mat3.multiply(matrix, 
+                           mat3.translation(translation[0],
+                                            translation[1]));
+
+    this.addQuad({
+      uResolution: [gl.canvas.width, gl.canvas.height],
+      uMatrix: [matrix]
+    });
+  };
+  
+  this.render = () => {
+
+    this.quad([0.5, -0.5]);
+
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    this.minibatch.forEach(({
+      program,
+      uniforms,
+      vao
+    }) => {
+
+      gl.useProgram(program);
+      
+      uniforms.forEach(_ => _());
+
+      gl.bindVertexArray(vao);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    });
+
+    this.minibatch = [];
+  };
+
+}
+
+function makeQuad(gl) {
 
   let vShader = createShader(gl, gl.VERTEX_SHADER, vShaderSource);
   let fShader = createShader(gl, gl.FRAGMENT_SHADER, fShaderSource);
@@ -20,9 +80,9 @@ export default function Graphics(state, gl) {
 
   /*
     (-1, 1).( 1, 1)
-        .
+    .
     (-1,-1).( 1,-1)
-   */
+  */
   let positions = [
     -1, 1,
     -1, -1,
@@ -52,31 +112,20 @@ export default function Graphics(state, gl) {
                          stride,
                          offset);
 
-  
 
-  let resUniformLocation = gl.getUniformLocation(program, "u_resolution");
-  
-  
+  const makeUniformSetter = (name) => (...args) => gl.uniform2f(gl.getUniformLocation(program, name), ...args);
 
+  const makeUniform3fvSetter = (name) => (matrix) => gl.uniformMatrix3fv(gl.getUniformLocation(program, name), false, matrix);
 
-  gl.clearColor(0, 0, 0, 0);
-
-  this.render = () => {
-    
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    gl.useProgram(program);
-
-    gl.uniform2f(resUniformLocation, gl.canvas.width, gl.canvas.height);
-
-    gl.bindVertexArray(vao);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    
-
+  return {
+    program,
+    vao,
+    uniforms: {
+      uResolution: makeUniformSetter("uResolution"),
+      uMatrix: makeUniform3fvSetter("uMatrix")
+    }
   };
-
-}
+};
 
 function createShader(gl, type, source) {
   let shader = gl.createShader(type);

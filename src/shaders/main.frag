@@ -1,8 +1,14 @@
 #version 300 es
+
+#define PI 3.14
+#define HALFPI (PI * 0.5)
+#define TAU (PI * 2.0)
  
 precision mediump float;
 
-uniform vec2 u_resolution;
+uniform vec2 uResolution;
+
+in vec2 vQuadCoord;
 
 out vec4 outColor;
 
@@ -46,9 +52,14 @@ float opIntersection(float d1, float d2) {
 }
 
 vec2 screenToWorld(vec2 screen) {
-  vec2 result = 2.0 * (screen/u_resolution.xy - 0.5);
-  result.x *= u_resolution.x/u_resolution.y;
+  vec2 result = 2.0 * (screen/uResolution.xy - 0.5);
+  result.x *= uResolution.x/uResolution.y;
   return result;
+}
+
+vec2 screenToWorld2(vec2 screen) {
+  screen.x *= uResolution.x/uResolution.y;
+  return screen;
 }
 
 mat3 affineMatrix(vec2 translation, float rotation) {
@@ -56,6 +67,15 @@ mat3 affineMatrix(vec2 translation, float rotation) {
               -sin(rotation), cos(rotation), 0.0,
               translation.x, translation.y, 1.0);
 }
+
+float sdHeroBubble(vec2 p, vec2 trans, float rot) {
+  vec2 pBubbles = 
+    (-inverse(affineMatrix(trans, rot)) * vec3(p, 1.0)).xy;
+  float bubbles = sdCircle(pBubbles, 0.2);
+
+  return bubbles;
+}
+
 
 void heroColor(out vec3 col, vec2 p) {
 
@@ -66,13 +86,18 @@ void heroColor(out vec3 col, vec2 p) {
 
   float wedge = sdCircle(p, 0.5);
 
-  vec2 bTrans = vec2(0.0, 0.5);
-  float bRot = 0.0;
-  vec2 pBubbles = 
-    (-inverse(affineMatrix(bTrans, bRot)) * vec3(p, 1.0)).xy;
-  float bubbles = sdCircle(pBubbles, 0.2);
+  float bubbles = 1.0;
 
-  float hero = opUnion(wedge, bubbles);
+  for (int i = 0; i < 2; i++) {
+
+    vec2 trans = vec2(0.0);
+    float rot = 0.0;
+
+    bubbles = opUnion(bubbles, sdHeroBubble(p, trans, rot));
+  }
+
+  // float hero = opUnion(wedge, bubbles);
+  float hero = bubbles;
 
   col = mix(col, vec3(1.0, 0.0, 0.0), 1.0 - smoothstep(0.0, 0.01, hero));
 }
@@ -93,7 +118,8 @@ void sceneColor(out vec3 col, vec2 p) {
 
 void main() {
 
-  vec2 p = screenToWorld(gl_FragCoord.xy);
+  // vec2 p = screenToWorld(gl_FragCoord.xy);
+  vec2 p = screenToWorld2(vQuadCoord);
 
   vec3 col = vec3(0.5);
 
