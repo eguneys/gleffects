@@ -2,6 +2,8 @@ export default function defaults(width, height) {
 
   const ratio = height / width;
 
+  const heroWidth = height * 0.5;
+
   const game = {
     unit: 30,
     width,
@@ -12,11 +14,10 @@ export default function defaults(width, height) {
   };
 
   const hero = {
-    radius: game.unit / 2,
-    gap: 2,
-    gapMove: 2,
-    rotation: 0,
-    tick: 0
+    width: heroWidth,
+    height: heroWidth,
+    x: width * 0.5 - heroWidth * 0.5,
+    y: height * 0.5 - heroWidth * 0.5
   };
 
   return {
