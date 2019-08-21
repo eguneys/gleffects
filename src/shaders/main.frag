@@ -6,26 +6,26 @@
  
 precision mediump float;
 
+uniform float uTime;
 uniform vec2 uResolution;
+
+uniform vec2 uSqueeze;
 
 in vec2 vQuadCoord;
 
 out vec4 outColor;
 
-float sdTriangleIsosceles( in vec2 q, in vec2 p )
-{
-    p.y -= 0.5;
-    p.x = abs(p.x);
-    
-	vec2 a = p - q*clamp( dot(p,q)/dot(q,q), 0.0, 1.0 );
-    vec2 b = p - q*vec2( clamp( p.x/q.x, 0.0, 1.0 ), 1.0 );
-    
-    float s = -sign( q.y );
+float usin(float v) {
+  return (sin(v) + 1.0) / 2.0;
+}
 
-    vec2 d = min( vec2( dot( a, a ), s*(p.x*q.y-p.y*q.x) ),
-                  vec2( dot( b, b ), s*(p.y-q.y)  ));
-
-	return -sqrt(d.x)*sign(d.y);
+float sdEquilateralTriangle( in vec2 p ) {
+  const float k = sqrt(3.0);
+  p.x = abs(p.x) - 1.0;
+  p.y = p.y + 1.0/k;
+  if( p.x+k*p.y>0.0 ) p = vec2(p.x-k*p.y,-k*p.x-p.y)/2.0;
+  p.x -= clamp( p.x, -2.0, 0.0 );
+  return -length(p)*sign(p.y);
 }
 
 float sdLine( in vec2 p, in vec2 a, in vec2 b )
@@ -67,6 +67,12 @@ float opIntersection(float d1, float d2) {
   return max(d1, d2);
 }
 
+vec2 opRep(vec2 p, vec2 c)
+{
+  vec2 q = mod(p,c)-0.5*c;
+  return q;
+}
+
 vec2 screenToWorld(vec2 screen) {
   vec2 result = 2.0 * (screen/uResolution.xy - 0.5);
   result.x *= uResolution.x/uResolution.y;
@@ -84,11 +90,19 @@ mat3 affineMatrix(vec2 translation, float rotation, float scaling) {
               translation.x, translation.y, 1.0);
 }
 
-vec2 transform(vec2 p, vec2 translate, float rotate, float scale) {
+vec2 transform(vec2 p, vec2 trans, float rotate, float scale) {
   //p = (-inverse(affineMatrix(vec2(0.0, 0.0), 0.0, 1.0)) * vec3(p, 1.0)).xy;
-  p = (-inverse(affineMatrix(translate, rotate, scale)) * vec3(p, 1.0)).xy;
+  p = (-inverse(affineMatrix(trans, rotate, scale)) * vec3(p, 1.0)).xy;
   // p = (-inverse(affineMatrix(vec2(-0.0, -0.0), 0.0, 1.0)) * vec3(p, 1.0)).xy;
   return p;
+}
+
+vec2 translate(vec2 p, vec2 trans) {
+  return transform(p, trans, 0.0, 1.0);
+}
+
+vec2 rotate(vec2 p, float angle) {
+  return transform(p, vec2(0.0), angle, 1.0);
 }
 
 float sdHeroBubble(vec2 p, vec2 trans, float rot) {
@@ -100,34 +114,20 @@ float sdHeroBubble(vec2 p, vec2 trans, float rot) {
 }
 
 
-float sdHero(vec2 p) {
+void heroColor(out vec4 col, vec2 p) {
 
-  vec2 hTrans = vec2(0.0);
-  float hRot = 3.14 *  0.0;
+  vec2 p2 = rotate(p, uSqueeze.x);
+  float wedgeBox = sdRoundedBox(p2, vec2(0.5, 0.01), 0.2);
 
-  p = transform(p, hTrans, hRot, 1.0);
-
-  float wedgeBox = sdRoundedBox(p, vec2(0.5, 0.2), 0.5);
-
-  float wedgeCircle = sdCircle(p, 0.5);
+  vec2 pSmall = transform(p, vec2(0.0), 0.0, 1.0);
+  float wedgeCircle = sdCircle(pSmall, 0.4);
   
-  float wedge = opBlend(wedgeBox, wedgeCircle, 1.0);
+  float wedge = opBlend(wedgeBox, wedgeCircle, 
+                        uSqueeze.y);
 
-  float bubbles = 1.0;
+  float hero = wedge;
 
-  for (int i = 0; i < 2; i++) {
-    float c = cos(float(i)*PI);
-    float s = sin(float(i)*PI);
-    vec2 trans = vec2(c, s);
-    float rot = 0.0;
-  
-    bubbles = opUnion(bubbles, sdHeroBubble(p, trans, rot));
-  }
-
-  float hero = opSubtraction(bubbles, wedge);
-
-
-  return hero;
+  col = mix(col, vec4(1.0, 0.0, 0.0, 1.0), 1.0-smoothstep(0.0, 0.02, hero));
 }
 
 void wallColor(out vec4 col, vec2 p) {
@@ -138,55 +138,18 @@ void wallColor(out vec4 col, vec2 p) {
 
 void sceneColor(out vec4 col, vec2 p) {
 
-  // heroColor(col, p);
+  heroColor(col, p);
   wallColor(col, p);
-
-}
-
-
-float raymarch(vec2 ro, vec2 rd)
-{
-
-  float total_distance_traveled = 0.0;
-
-  for (int i = 0; i < 50; i++) {
-
-    vec2 current_pos = ro + total_distance_traveled * rd;
-
-    bool outside_bounds = current_pos.x < 0.0 || current_pos.x > 1.0 || current_pos.y < 0.0 || current_pos.y > 1.0; 
-
-    float dist = sdHero(current_pos);
-		
-    if (dist < 0.001) {
-      return dist;
-    }
-
-    if (dist > 0.01) {
-      break;
-    }
-
-    total_distance_traveled += dist;
-  }
-	
-  return 1.0;
 }
 
 
 void main() {
 
-  // vec2 p = screenToWorld(gl_FragCoord.xy);
-  vec2 p = screenToWorld2(vQuadCoord);
+  vec2 p = vQuadCoord;//screenToWorld2(vQuadCoord);
 
   vec4 col = vec4(0.5, 0.5, 0.5, 0.0);
 
-  // sceneColor(col, p);
+  sceneColor(col, p);
 
-  vec2 ro = p;
-  vec2 rd = vec2(0.0, 0.5);
-
-  float dist = raymarch(ro, rd);
-
-  col = vec4(-dist, 0.0, 0.0, 1.0);
-  
   outColor = col;
 }

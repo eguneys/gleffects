@@ -1,3 +1,4 @@
+import { objMap } from './util2';
 import * as u from './util';
 
 import mat3 from './matrix';
@@ -18,53 +19,63 @@ export default function Graphics(state, gl) {
 
   this.minibatch = [];
 
-  let quad = makeQuad(gl, width, height);
+  const heroWidth = height * 0.5;
 
-  let smallQuad = makeQuad(gl, width * 0.5, height * 0.5);
+  let hero = makeQuad(gl, {
+    uSqueeze: makeUniform2fvSetter("uSqueeze"),
+    uResolution: makeUniformSetter2f("uResolution"),
+    uTime: makeUniformSetter("uTime"),
+    uMatrix: makeUniform3fvSetter("uMatrix")
+  }, heroWidth, heroWidth);
 
-  this.addQuad = (quad, uniformArgs) => {
+  this.addHero = (props) => {
+    addQuad(hero, {
+      uSqueeze: [props.squeeze],
+      uTime: [props.tick],
+      ...baseUniforms(props)
+    });
+  };
+
+  const baseUniforms = ({
+    pivot,
+    translation,
+    rotation,
+    scale
+  }) =>
+  {
+    const uMatrix = mat3.transform([width, height],
+                                  translation,
+                                  rotation,
+                                  scale,
+                                  pivot);
+
+    return {
+      uResolution: [gl.canvas.width, gl.canvas.height],
+      uMatrix: [uMatrix]
+    };
+  };
+
+  const addQuad = (quad, uniformArgs) => {
     const cookUniforms = Object.keys(quad.uniforms).map(key => {
       let setter = quad.uniforms[key];
       let args = uniformArgs[key];
-      return () => setter(...args);
+      return () => {
+        setter(...args);
+      };
     });
     this.minibatch.push({...quad, uniforms: cookUniforms });
-  };
-
-  this.quad = (quad, translation, rotation = 0, scale = [1, 1], pivot = [quad.width/2,quad.height/2]) => {
-
-    let matrix = mat3.identity();
-    matrix = mat3.multiply(matrix,
-                           mat3.projection(width,
-                                           height));
-
-    matrix = mat3.multiply(matrix,
-                           mat3.translation(translation[0],
-                                            translation[1]));
-
-    matrix = mat3.multiply(matrix,
-                           mat3.translation(pivot[0],
-                                            pivot[1]));
-
-    matrix = mat3.multiply(matrix,
-                           mat3.rotation(rotation));
-
-    matrix = mat3.multiply(matrix,
-                           mat3.scaling(scale[0],
-                                        scale[1]));
-    matrix = mat3.multiply(matrix,
-                           mat3.translation(-pivot[0],
-                                            -pivot[1]));
-
-    this.addQuad(quad, {
-      uResolution: [gl.canvas.width, gl.canvas.height],
-      uMatrix: [matrix]
-    });
   };
   
   this.render = () => {
 
-    this.quad(smallQuad, [0.0, 1.0], Math.PI * 0.1, [1.0, 1.0]);
+    this.addHero({
+      tick: state.game.tick,
+      squeeze: [u.PI* 0.0, 1.0],
+      translation: [width*0.5 - heroWidth* 0.5, height*0.5 - heroWidth* 0.5],
+      rotation: Math.PI * 0.0, 
+      scale: [1.0, 1.0],
+      pivot: [heroWidth*0.5, heroWidth*0.5]
+    });
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -79,6 +90,8 @@ export default function Graphics(state, gl) {
 
       uniforms.forEach(_ => _());
 
+      
+
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     });
@@ -88,7 +101,16 @@ export default function Graphics(state, gl) {
 
 }
 
-function makeQuad(gl, width, height) {
+const makeUniformSetter = name => (gl, program) => (...args) => gl.uniform1f(gl.getUniformLocation(program, name), ...args);
+
+
+const makeUniformSetter2f = name => (gl, program) => (...args) => gl.uniform2f(gl.getUniformLocation(program, name), ...args);
+
+const makeUniform2fvSetter = name => (gl, program) => (vec) => gl.uniform2fv(gl.getUniformLocation(program, name), vec);
+
+const makeUniform3fvSetter = name => (gl, program) => (matrix) => gl.uniformMatrix3fv(gl.getUniformLocation(program, name), false, matrix);
+
+function makeQuad(gl, uniforms, width, height) {
 
   let vShader = createShader(gl, gl.VERTEX_SHADER, vShaderSource);
   let fShader = createShader(gl, gl.FRAGMENT_SHADER, fShaderSource);
@@ -182,21 +204,12 @@ function makeQuad(gl, width, height) {
                          stride,
                          offset);
 
-
-
-  const makeUniformSetter = (name) => (...args) => gl.uniform2f(gl.getUniformLocation(program, name), ...args);
-
-  const makeUniform3fvSetter = (name) => (matrix) => gl.uniformMatrix3fv(gl.getUniformLocation(program, name), false, matrix);
-
   return {
     width,
     height,
     program,
     vao,
-    uniforms: {
-      uResolution: makeUniformSetter("uResolution"),
-      uMatrix: makeUniform3fvSetter("uMatrix")
-    }
+    uniforms: objMap(uniforms, (_, v) => v(gl, program))
   };
 };
 

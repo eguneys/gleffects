@@ -1,10 +1,41 @@
-export default {
+const mat3 = {
   identity: function identity() {
     return [
       1, 0, 0,
       0, 1, 0,
       0, 0, 1,
     ];
+  },
+
+  transform: function transform(projection,
+                                translation,
+                                rotation,
+                                scaling,
+                                pivot) {
+    let matrix = mat3.identity();
+
+    matrix = mat3.multiply(matrix,
+                           mat3.projection(projection[0],
+                                           projection[1]));
+
+    matrix = mat3.multiply(matrix,
+                           mat3.translation(translation[0],
+                                            translation[1]));
+
+    matrix = mat3.multiply(matrix,
+                           mat3.translation(pivot[0],
+                                            pivot[1]));
+
+    matrix = mat3.multiply(matrix,
+                           mat3.rotation(rotation));
+
+    matrix = mat3.multiply(matrix,
+                           mat3.scaling(scaling[0],
+                                        scaling[1]));
+    matrix = mat3.multiply(matrix,
+                           mat3.translation(-pivot[0],
+                                            -pivot[1]));
+    return matrix;
   },
 
   projection: function projection(width, height) {
@@ -75,3 +106,5 @@ export default {
     ];
   },
 };
+
+export default mat3;
