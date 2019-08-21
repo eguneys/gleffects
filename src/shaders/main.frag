@@ -50,6 +50,11 @@ float sdRoundedBox(vec2 p, vec2 b, float r )
   return sdBox(p, b) - r;
 }
 
+float opBlend(float d1, float d2, float a)
+{
+ return a * d1 + (1.0 - a) * d2;
+}
+
 float opUnion(float d1, float d2) {
   return min(d1, d2);
 }
@@ -89,20 +94,24 @@ vec2 transform(vec2 p, vec2 translate, float rotate, float scale) {
 float sdHeroBubble(vec2 p, vec2 trans, float rot) {
   vec2 pBubbles = 
     transform(p, trans, rot, 1.0);
-  float bubbles = sdCircle(pBubbles, 0.25);
+  float bubbles = sdCircle(pBubbles, 0.5);
 
   return bubbles;
 }
 
 
-void heroColor(out vec4 col, vec2 p) {
+float sdHero(vec2 p) {
 
   vec2 hTrans = vec2(0.0);
   float hRot = 3.14 *  0.0;
 
   p = transform(p, hTrans, hRot, 1.0);
 
-  float wedge = sdRoundedBox(p, vec2(0.5, 0.2), 0.5);
+  float wedgeBox = sdRoundedBox(p, vec2(0.5, 0.2), 0.5);
+
+  float wedgeCircle = sdCircle(p, 0.5);
+  
+  float wedge = opBlend(wedgeBox, wedgeCircle, 1.0);
 
   float bubbles = 1.0;
 
@@ -115,9 +124,10 @@ void heroColor(out vec4 col, vec2 p) {
     bubbles = opUnion(bubbles, sdHeroBubble(p, trans, rot));
   }
 
-  float hero = opUnion(wedge, bubbles);
+  float hero = opSubtraction(bubbles, wedge);
 
-  col = mix(col, vec4(1.0, 0.0, 0.0, 1.0), 1.0 - smoothstep(0.0, 0.01, hero));
+
+  return hero;
 }
 
 void wallColor(out vec4 col, vec2 p) {
@@ -128,9 +138,37 @@ void wallColor(out vec4 col, vec2 p) {
 
 void sceneColor(out vec4 col, vec2 p) {
 
-  heroColor(col, p);
+  // heroColor(col, p);
   wallColor(col, p);
 
+}
+
+
+float raymarch(vec2 ro, vec2 rd)
+{
+
+  float total_distance_traveled = 0.0;
+
+  for (int i = 0; i < 50; i++) {
+
+    vec2 current_pos = ro + total_distance_traveled * rd;
+
+    bool outside_bounds = current_pos.x < 0.0 || current_pos.x > 1.0 || current_pos.y < 0.0 || current_pos.y > 1.0; 
+
+    float dist = sdHero(current_pos);
+		
+    if (dist < 0.001) {
+      return dist;
+    }
+
+    if (dist > 0.01) {
+      break;
+    }
+
+    total_distance_traveled += dist;
+  }
+	
+  return 1.0;
 }
 
 
@@ -141,7 +179,14 @@ void main() {
 
   vec4 col = vec4(0.5, 0.5, 0.5, 0.0);
 
-  sceneColor(col, p);
+  // sceneColor(col, p);
+
+  vec2 ro = p;
+  vec2 rd = vec2(0.0, 0.5);
+
+  float dist = raymarch(ro, rd);
+
+  col = vec4(-dist, 0.0, 0.0, 1.0);
   
   outColor = col;
 }

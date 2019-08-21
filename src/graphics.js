@@ -64,7 +64,7 @@ export default function Graphics(state, gl) {
   
   this.render = () => {
 
-    this.quad(quad, [0.0, 1.0], Math.PI * 0.1, [1.0, 1.0]);
+    this.quad(smallQuad, [0.0, 1.0], Math.PI * 0.1, [1.0, 1.0]);
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
