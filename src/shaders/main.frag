@@ -84,17 +84,14 @@ vec2 screenToWorld2(vec2 screen) {
   return screen;
 }
 
-mat3 affineMatrix(vec2 translation, float rotation, float scaling) {
-  return mat3(scaling*cos(rotation), -sin(rotation), 0.0,
-              sin(rotation), scaling*cos(rotation), 0.0,
+mat3 affineMatrix(vec2 translation, float rotation) {
+  return mat3(cos(rotation), -sin(rotation), 0.0,
+              sin(rotation), cos(rotation), 0.0,
               translation.x, translation.y, 1.0);
 }
 
 vec2 transform(vec2 p, vec2 trans, float rotate, float scale) {
-  //p = (-inverse(affineMatrix(vec2(0.0, 0.0), 0.0, 1.0)) * vec3(p, 1.0)).xy;
-  p = (-inverse(affineMatrix(trans, rotate, scale)) * vec3(p, 1.0)).xy;
-  // p = (-inverse(affineMatrix(vec2(-0.0, -0.0), 0.0, 1.0)) * vec3(p, 1.0)).xy;
-  return p;
+  return (-inverse(affineMatrix(trans, rotate)) * vec3(p, 1.0)).xy;
 }
 
 vec2 translate(vec2 p, vec2 trans) {
@@ -119,15 +116,33 @@ void heroColor(out vec4 col, vec2 p) {
   vec2 p2 = rotate(p, uSqueeze.x);
   float wedgeBox = sdRoundedBox(p2, vec2(0.5, 0.01), 0.2);
 
-  vec2 pSmall = transform(p, vec2(0.0), 0.0, 1.0);
+  vec2 pSmall = transform(p, vec2(0.0, 0.0), 0.0, 1.0);
   float wedgeCircle = sdCircle(pSmall, 0.4);
+
+
+  pSmall = transform(p, vec2(0.0, 0.0), uSqueeze.x, 0.2);
+  float hBox = sdRoundedBox(pSmall, vec2(0.2, 0.001), 0.1);
+
+  pSmall = translate(pSmall, vec2(0.0, 0.1));
+  float hCircle = sdCircle(pSmall, 0.1);
+
+
+  float highlight = opBlend(hBox, hCircle,
+                            uSqueeze.y);
+  // highlight = hCircle;
   
   float wedge = opBlend(wedgeBox, wedgeCircle, 
                         uSqueeze.y);
 
   float hero = wedge;
+  // hero = wedgeBox;
+
+  col = mix(col, vec4(0.0, 1.0, 0.0, 1.0), 1.0-smoothstep(0.0, 0.1, abs(hero)));
 
   col = mix(col, vec4(1.0, 0.0, 0.0, 1.0), 1.0-smoothstep(0.0, 0.02, hero));
+
+  col = mix(col, vec4(1.0, 1.0, 1.0, 1.0), 1.0-smoothstep(0.0, 0.1, highlight));
+
 }
 
 void wallColor(out vec4 col, vec2 p) {

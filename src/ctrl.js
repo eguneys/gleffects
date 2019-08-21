@@ -7,12 +7,14 @@ export default function ctrl(state, g) {
   this.data = state;
 
 
-  this.hero = new makeHero(this, g);
+  const hero = new makeHero(this, g);
+
+  this.spaceHit = () => {
+    hero.userJump();
+  };
 
   this.update = delta => {
-
     this.data.game.tick += delta;
-    
-    this.hero.update(delta);
+    hero.update(delta);
   };
 }

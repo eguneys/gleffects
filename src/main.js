@@ -5,6 +5,8 @@ import makeView from './view';
 import makeCtrl from './ctrl';
 import Loop from 'loopz';
 
+import * as events from './events';
+
 export function app(element, options) {
 
   const canvas = document.createElement('canvas'),
@@ -32,11 +34,12 @@ export function app(element, options) {
     graphics.render();
   }).start();
 
+  events.bindDocument(ctrl);
 
   if (module.hot) {
     module.hot.accept('./ctrl', function() {
       try {
-        ctrl = new makeCtrl(state, ctx);
+        ctrl = new makeCtrl(state, graphics);
       } catch (e) {
         console.log(e);
       }
