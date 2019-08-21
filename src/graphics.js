@@ -3,8 +3,7 @@ import * as u from './util';
 
 import mat3 from './matrix';
 
-import vShaderSource from './shaders/main.vert';
-import fShaderSource from './shaders/main.frag';
+import shaderMap from './shaders';
 
 export default function Graphics(state, gl) {
 
@@ -61,8 +60,8 @@ export default function Graphics(state, gl) {
 
   this.makeQuad = (uniforms, width, height) => {
 
-    let vShader = createShader(gl, gl.VERTEX_SHADER, vShaderSource);
-    let fShader = createShader(gl, gl.FRAGMENT_SHADER, fShaderSource);
+    let vShader = createShader(gl, gl.VERTEX_SHADER, shaderMap['vmain']);
+    let fShader = createShader(gl, gl.FRAGMENT_SHADER, shaderMap['fmain']);
 
     let program = createProgram(gl, vShader, fShader);
 
@@ -207,7 +206,7 @@ function createShader(gl, type, source) {
     return shader;
   }
 
-  console.error(gl.getShaderInfoLog(shader));
+  console.error('Cannot create shader ' + gl.getShaderInfoLog(shader));
   gl.deleteShader(shader);
   return null;
 };
