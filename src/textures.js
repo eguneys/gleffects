@@ -52,6 +52,6 @@ function withCanvasTexture(width, height, f) {
   canvas.height = height;
   f(width, height, canvas.getContext('2d'), canvas);
   const texture = canvas;
-  document.body.append(canvas);
+  // document.body.append(canvas);
   return texture;
 }

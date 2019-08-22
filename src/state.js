@@ -17,6 +17,8 @@ export default function defaults(width, height) {
     x: width * 0.5,
     y: height * 0.5,
     radius: width * 0.3,
+    fWidth: width * 0.5,
+    fHeight: height * 0.5,
     fG: 1
   };
 

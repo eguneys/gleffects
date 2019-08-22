@@ -2,6 +2,7 @@ import * as u from '../util';
 import shaderMap from '../shaders';
 
 import heroView from './hero';
+import holeView from './hole';
 
 export default function view(ctrl, g) {
 
@@ -15,6 +16,8 @@ export default function view(ctrl, g) {
 
   const hero = new heroView(ctrl, g);
 
+  const hole = new holeView(ctrl, g);
+
   this.render = ctrl => {
 
     g.addTexture(grid, {
@@ -23,7 +26,9 @@ export default function view(ctrl, g) {
       scale: [1.0, 1.0],
       pivot: [width * 0.5, height * 0.5]
     });
-    
+
+    hole.render(ctrl);
+
     hero.render(ctrl);
   };
 

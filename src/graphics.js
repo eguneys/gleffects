@@ -18,9 +18,6 @@ export default function Graphics(state, gl) {
 
   this.minibatch = [];
 
-
-  const heroWidth = height * 0.5;
-
   this.addHero = (hero, props) => {
     addQuad(hero, {
       uSqueeze: [props.squeeze],
@@ -36,8 +33,9 @@ export default function Graphics(state, gl) {
     });
   };
 
-  this.addQuad = (quad, props) => {
+  this.addQuad = (quad, props, uniforms) => {
     addQuad(quad, {
+      ...uniforms,
       ...baseUniforms(props)
     });
   };
@@ -73,10 +71,12 @@ export default function Graphics(state, gl) {
   };
 
   this.makeQuad = ({
+    name,
     vSource,
     fSource,
     uniforms
   }, width, height) => {
+    vSource = vSource || shaderMap['vmain'];
 
     let vShader = createShader(gl, gl.VERTEX_SHADER, vSource);
     let fShader = createShader(gl, gl.FRAGMENT_SHADER, fSource);
@@ -171,6 +171,7 @@ export default function Graphics(state, gl) {
                            offset);
 
     return {
+      name,
       width,
       height,
       program,
@@ -270,7 +271,7 @@ function createShader(gl, type, source) {
     return shader;
   }
 
-  console.error('Cannot create shader ' + source + ' log ' + gl.getShaderInfoLog(shader));
+  console.error('Cannot create shader: [' + source + '] ' + gl.getShaderInfoLog(shader));
   gl.deleteShader(shader);
   return null;
 };

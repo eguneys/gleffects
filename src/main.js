@@ -35,7 +35,7 @@ export function app(element, options) {
     ctrl.update(delta);
     view.render(ctrl);
     graphics.render();
-  }).start();
+  }, 1).start();
 
   events.bindDocument(ctrl);
 
