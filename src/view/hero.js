@@ -1,26 +1,33 @@
+import shaderMap from '../shaders';
+
 import * as u from '../util';
 
 import * as G from '../graphics';
 
 export default function view(ctrl, g) {
   const { width, height } = ctrl.data.game;
+  const aspect = height / width;
 
   const { width: heroWidth } = ctrl.data.hero;
   
   const game = ctrl.data;
 
   let heroQuad = g.makeQuad({
-    uSqueeze: G.makeUniform2fvSetter("uSqueeze"),
-    uResolution: G.makeUniformSetter2f("uResolution"),
-    uTime: G.makeUniformSetter("uTime"),
-    uMatrix: G.makeUniform3fvSetter("uMatrix")
+    vSource: shaderMap['vmain'],
+    fSource: shaderMap['fmain'],
+    uniforms: {
+      uSqueeze: G.makeUniform2fvSetter("uSqueeze"),
+      uResolution: G.makeUniform2fSetter("uResolution"),
+      uTime: G.makeUniform1fSetter("uTime"),
+      uMatrix: G.makeUniform3fvSetter("uMatrix")
+    }
   }, heroWidth, heroWidth);
 
   this.render = ctrl => {
     const hole = ctrl.data.hole,
           hero = ctrl.data.hero;
 
-    const c = Math.cos(hero.theta) * (hole.radius - hero.y),
+    const c = Math.cos(hero.theta) * (hole.radius - hero.y) / aspect,
           s = Math.sin(hero.theta) * (hole.radius - hero.y);
 
     let x = hole.x - heroWidth * 0.5 + c,

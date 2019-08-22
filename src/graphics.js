@@ -1,22 +1,23 @@
+import shaderMap from './shaders';
+
 import { objMap } from './util2';
 import * as u from './util';
 
 import mat3 from './matrix';
-
-import shaderMap from './shaders';
 
 export default function Graphics(state, gl) {
 
   const { width, height } = state.game;
 
   gl.clearColor(0, 0, 0, 1);
-  // https://stackoverflow.com/questions/18439897/webgl-fragment-shader-opacity
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  // https://stackoverflow.com/questions/57612782/how-to-render-objects-without-blending-with-transparency-enabled-in-webgl/57613578#57613578
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.BLEND);
   gl.disable(gl.DEPTH_TEST);
 
 
   this.minibatch = [];
+
 
   const heroWidth = height * 0.5;
 
@@ -24,6 +25,19 @@ export default function Graphics(state, gl) {
     addQuad(hero, {
       uSqueeze: [props.squeeze],
       uTime: [props.tick],
+      ...baseUniforms(props)
+    });
+  };
+
+  this.addTexture = (quad, props) => {
+    addQuad(quad, {
+      uTexture: [],
+      ...baseUniforms(props)
+    });
+  };
+
+  this.addQuad = (quad, props) => {
+    addQuad(quad, {
       ...baseUniforms(props)
     });
   };
@@ -58,10 +72,14 @@ export default function Graphics(state, gl) {
     this.minibatch.push({...quad, uniforms: cookUniforms });
   };
 
-  this.makeQuad = (uniforms, width, height) => {
+  this.makeQuad = ({
+    vSource,
+    fSource,
+    uniforms
+  }, width, height) => {
 
-    let vShader = createShader(gl, gl.VERTEX_SHADER, shaderMap['vmain']);
-    let fShader = createShader(gl, gl.FRAGMENT_SHADER, shaderMap['fmain']);
+    let vShader = createShader(gl, gl.VERTEX_SHADER, vSource);
+    let fShader = createShader(gl, gl.FRAGMENT_SHADER, fSource);
 
     let program = createProgram(gl, vShader, fShader);
 
@@ -160,7 +178,46 @@ export default function Graphics(state, gl) {
       uniforms: objMap(uniforms, (_, v) => v(gl, program))
     };
   };
-  
+
+  this.makeSprite = ({
+    texture,
+    fSource
+  }, width, height) => {
+    fSource = fSource || shaderMap['ftexture'];
+
+    const textureUnit = 0;
+    
+    let res = this.makeQuad({
+      vSource: shaderMap['vtexture'],
+      fSource,
+      uniforms: {
+        uResolution: makeUniform2fSetter("uResolution"),
+        uMatrix: makeUniform3fvSetter("uMatrix"),
+        uTexture: makeUniform1iSetter("uTexture", textureUnit)
+      }
+    }, width, height);
+
+    let glTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, glTexture);
+
+    const format = gl.RGBA,
+          type = gl.UNSIGNED_BYTE;
+    gl.texImage2D(gl.TEXTURE_2D, 0, format, format, type, texture);
+    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+    res = {
+      texture: glTexture,
+      textureUnit,
+      ...res
+    };
+
+    return res;    
+  };
+
   this.render = () => {
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -169,14 +226,20 @@ export default function Graphics(state, gl) {
     this.minibatch.forEach(({
       program,
       uniforms,
-      vao
+      vao,
+      texture,
+      textureUnit
     }) => {
 
       gl.useProgram(program);
 
       uniforms.forEach(_ => _());
 
-      
+
+      if (texture) {
+        gl.activeTexture(gl.TEXTURE0 + textureUnit);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+      }
 
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -184,13 +247,14 @@ export default function Graphics(state, gl) {
 
     this.minibatch = [];
   };
-
 }
 
-export const makeUniformSetter = name => (gl, program) => (...args) => gl.uniform1f(gl.getUniformLocation(program, name), ...args);
+export const makeUniform1iSetter = (name, args) => (gl, program) => () => gl.uniform1i(gl.getUniformLocation(program, name), args);
+
+export const makeUniform1fSetter = name => (gl, program) => (...args) => gl.uniform1f(gl.getUniformLocation(program, name), ...args);
 
 
-export const makeUniformSetter2f = name => (gl, program) => (...args) => gl.uniform2f(gl.getUniformLocation(program, name), ...args);
+export const makeUniform2fSetter = name => (gl, program) => (...args) => gl.uniform2f(gl.getUniformLocation(program, name), ...args);
 
 export const makeUniform2fvSetter = name => (gl, program) => (vec) => gl.uniform2fv(gl.getUniformLocation(program, name), vec);
 
@@ -206,7 +270,7 @@ function createShader(gl, type, source) {
     return shader;
   }
 
-  console.error('Cannot create shader ' + gl.getShaderInfoLog(shader));
+  console.error('Cannot create shader ' + source + ' log ' + gl.getShaderInfoLog(shader));
   gl.deleteShader(shader);
   return null;
 };

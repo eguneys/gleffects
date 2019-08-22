@@ -2,7 +2,7 @@ export default function defaults(width, height) {
 
   const ratio = height / width;
 
-  const heroWidth = height * 0.2;
+  const heroWidth = height * 0.1;
 
   const game = {
     unit: 30,

@@ -1,16 +1,21 @@
 import * as u from './util';
 
-import heroView from './view/hero';
+import playView from './view/play';
+import menuView from './view/menu';
 
 export default function view(ctrl, g) {
 
   const { width, height } = ctrl.data.game;
 
-  const hero = new heroView(ctrl, g);
+  const play = new playView(ctrl, g);
+
+  const menu = new menuView(ctrl, g);
 
   this.render = ctrl => {
     
-    hero.render(ctrl);
+    play.render(ctrl);
+
+    // menu.render(ctrl);
 
   };
 

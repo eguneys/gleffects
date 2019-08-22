@@ -75,7 +75,7 @@ void sceneColor(out vec4 col, vec2 p) {
 
 void main() {
 
-  vec2 p = vQuadCoord;//screenToWorld2(vQuadCoord);
+  vec2 p = vQuadCoord;
 
   vec4 col = vec4(0.5, 0.5, 0.5, 0.0);
 

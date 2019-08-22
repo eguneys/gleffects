@@ -1,5 +1,7 @@
 import defaults from './state';
 
+import textures from './textures';
+
 import Graphics from './graphics';
 import makeView from './view';
 import makeCtrl from './ctrl';
@@ -20,7 +22,8 @@ export function app(element, options) {
 
 
   const state = {
-    ...defaults(displayWidth, displayHeight)
+    ...defaults(displayWidth, displayHeight),
+    textures: textures()
   };
 
   let graphics = new Graphics(state, gl);
