@@ -6,19 +6,12 @@ precision mediump float;
 
 uniform float uTime;
 
-
 in vec2 vQuadCoord;
 
 out vec4 outColor;
 
 #include futil
-
-void sceneColor(out vec4 col, vec2 p) {
-
-  col = vec4(1.0, 0.0, 0.0, 1.0);
-
-}
-
+#include feffects
 
 void main() {
 
@@ -26,7 +19,7 @@ void main() {
 
   vec4 col = vec4(0.5, 0.5, 0.5, 0.0);
 
-  sceneColor(col, p);
+  hsprites(col, p);
 
   outColor = col;
 }

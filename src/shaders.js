@@ -10,10 +10,14 @@ import fBackgroundShader from './shaders/background.frag';
 import pFDefsShader from './shaders/defs.partial.frag';
 import pFUtilShader from './shaders/util.partial.frag';
 
+// remove on production
+import pFEffectsShader from './shaders/effects.partial.frag';
+
 
 const partialShaders = {
   'futil': pFUtilShader,
   'fdefs': pFDefsShader,
+  'feffects': pFEffectsShader
 };
 
 const rawShaders = {
