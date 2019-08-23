@@ -9,10 +9,10 @@ export default function textures() {
 };
 
 const gridTexture = () => withCanvasTexture(1024, 1024, (w, h, ctx, canvas) => {
-  const gap = w * 0.008;
+  const gap = h * 0.01;
 
-  ctx.strokeStyle = 'yellow';
-  ctx.lineWidth = 0.08;
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 1;
   ctx.beginPath();
 
   ctx.fillStyle = 'white';

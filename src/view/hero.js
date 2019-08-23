@@ -27,15 +27,11 @@ export default function view(ctrl, g) {
     const hole = ctrl.data.hole,
           hero = ctrl.data.hero;
 
-    const c = Math.cos(hero.theta) * (hole.radius - hero.y) / aspect,
-          s = Math.sin(hero.theta) * (hole.radius - hero.y);
-
-    let x = hole.x - heroWidth * 0.5 + c,
-        y = hole.y - heroWidth * 0.5 + s;
+    const { x, y } = hero;
 
     let dSqueeze = u.smoothstep(hole.radius * 0.35,
                                 hole.radius * 0.5,
-                                Math.abs(hero.y)) * 0.5,
+                                Math.abs(hero.j)) * 0.5,
         aSqueeze = (-hero.theta + u.PI * 0.5) % u.TAU;
 
 

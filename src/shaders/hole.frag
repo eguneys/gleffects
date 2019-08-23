@@ -42,12 +42,17 @@ void main() {
 
   vec4 tColor = texture(uTexture, holeCoord);
 
-  vec4 white = mix(tColor, vec4(0.5, 0.5, 0.5, 1.0), 0.5);
-  vec4 black = mix(tColor, vec4(0.0, 0.0, 0.0, 1.0), 0.5);
+  tColor.a *= 0.2;
+
+  vec4 white = mix(tColor, vec4(0.5, 0.5, 0.5, 0.2), 0.5);
+  vec4 black = mix(tColor, vec4(0.0, 0.0, 0.0, 0.2), 0.5);
 
   float maxDist = max(abs(vQ.x), abs(vQ.y));
   float circular = length(vQ);
   float square = maxDist;
   
   outColor = mix(white, black, mix(circular, square, maxDist));
+
+  outColor = mix(outColor, vec4(0.0, 0.0, 0.0, 1.0), 
+                 1.0 - smoothstep(0.0, 0.4, abs(impact - 0.5)));
 }

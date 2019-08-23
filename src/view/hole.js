@@ -7,7 +7,11 @@ export default function hole(ctrl, g) {
 
   const { textures } = ctrl.data;
   const { width, height } = ctrl.data.game;
+  const aspect = height / width;
+
+  const { width: heroWidth } = ctrl.data.hero;
   const { fWidth, fHeight } = ctrl.data.hole;
+
 
   const field = g.makeQuad({
     name: 'field',
@@ -33,8 +37,11 @@ export default function hole(ctrl, g) {
   this.render = () => {
     const { tick } = ctrl.data.game;
 
-    const { radius: holeRadius } = ctrl.data.hole;
-    const { y: heroY, theta: heroTheta } = ctrl.data.hero;
+    const hole = ctrl.data.hole;
+    const hero = ctrl.data.hero;
+
+    let nX = (width * 0.5 - hole.x) / (width * 0.5),
+        nY = (height * 0.5 - hole.y) / (height * 0.5);
 
     g.addTexture(grid, {
       translation: [0, 0],
@@ -43,8 +50,8 @@ export default function hole(ctrl, g) {
       pivot: [width * 0.5, height * 0.5]
     }, {
       uTime: [tick],
-      uImpact: [0.5],
-      uPos: [0.5, 0.0]
+      uImpact: [hole.impact],
+      uPos: [nX, nY]
     });
 
     g.addQuad(field, {
@@ -53,7 +60,7 @@ export default function hole(ctrl, g) {
       scale: [1.0, 1.0],
       pivot: [fWidth * 0.5, fHeight * 0.5]
     }, {
-      uField: [u.smoothstep(0.3, 0.8, heroY / holeRadius), heroTheta + u.PI]
+      uField: [u.smoothstep(0.3, 0.8, hero.j / hole.radius), hero.theta + u.PI]
     });
 
   };
