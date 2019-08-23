@@ -8,8 +8,12 @@ export function rand(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-export function clamp(v, min, max) {
+export function clamp(min, max, v) {
   return Math.min(Math.max(v, min), max);
+}
+
+export function usin(v) {
+  return (Math.sin(v) + 1.0) / 2.0;
 }
 
 export function smoothstep (min, max, value) {

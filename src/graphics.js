@@ -26,9 +26,10 @@ export default function Graphics(state, gl) {
     });
   };
 
-  this.addTexture = (quad, props) => {
+  this.addTexture = (quad, props, uniforms) => {
     addQuad(quad, {
       uTexture: [],
+      ...uniforms,
       ...baseUniforms(props)
     });
   };
@@ -64,6 +65,9 @@ export default function Graphics(state, gl) {
       let setter = quad.uniforms[key];
       let args = uniformArgs[key];
       return () => {
+        if (!args) {
+          throw new Error("undefined uniform " + key);
+        }
         setter(...args);
       };
     });
@@ -182,7 +186,8 @@ export default function Graphics(state, gl) {
 
   this.makeSprite = ({
     texture,
-    fSource
+    fSource,
+    uniforms
   }, width, height) => {
     fSource = fSource || shaderMap['ftexture'];
 
@@ -192,6 +197,7 @@ export default function Graphics(state, gl) {
       vSource: shaderMap['vtexture'],
       fSource,
       uniforms: {
+        ...uniforms,
         uResolution: makeUniform2fSetter("uResolution"),
         uMatrix: makeUniform3fvSetter("uMatrix"),
         uTexture: makeUniform1iSetter("uTexture", textureUnit)

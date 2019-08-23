@@ -26,7 +26,7 @@ export default function defaults(width, height) {
     width: heroWidth,
     height: heroWidth,
     theta: 0,
-    w: 0.05,
+    w: 0.5,
     y: 0,
     vy: 0,
     aCy: -1,

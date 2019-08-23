@@ -18,9 +18,34 @@ export default function hole(ctrl, g) {
     }
   }, fWidth, fHeight);
 
+
+  const grid = g.makeSprite({ 
+    texture: textures['grid'],
+    fSource: shaderMap['fhole'],
+    uniforms: {
+      uTime: G.makeUniform1fSetter("uTime"),
+      uPos: G.makeUniform2fSetter("uPos"),
+      uImpact: G.makeUniform1fSetter("uImpact")
+    }
+  }, width, height);
+
+
   this.render = () => {
+    const { tick } = ctrl.data.game;
+
     const { radius: holeRadius } = ctrl.data.hole;
     const { y: heroY, theta: heroTheta } = ctrl.data.hero;
+
+    g.addTexture(grid, {
+      translation: [0, 0],
+      rotation: 0.0,
+      scale: [1.0, 1.0],
+      pivot: [width * 0.5, height * 0.5]
+    }, {
+      uTime: [tick],
+      uImpact: [0.5],
+      uPos: [0.5, 0.0]
+    });
 
     g.addQuad(field, {
       translation: [(width - fWidth) * 0.5, (height - fHeight) * 0.5],
@@ -28,7 +53,7 @@ export default function hole(ctrl, g) {
       scale: [1.0, 1.0],
       pivot: [fWidth * 0.5, fHeight * 0.5]
     }, {
-      uField: [heroY / holeRadius, heroTheta + u.PI]
+      uField: [u.smoothstep(0.3, 0.8, heroY / holeRadius), heroTheta + u.PI]
     });
 
   };
