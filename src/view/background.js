@@ -12,7 +12,8 @@ export default function view(ctrl, g) {
     fSource: shaderMap['fbg'],
     uniforms: {
       uTime: G.makeUniform1fSetter("uTime"),
-      uMatrix: G.makeUniform3fvSetter("uMatrix")
+      uMatrix: G.makeUniform3fvSetter("uMatrix"),
+      uResolution: G.makeUniform2fSetter("uResolution")
     }
   }, width, height);
 
