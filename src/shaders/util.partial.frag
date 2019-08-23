@@ -56,16 +56,16 @@ vec2 opRep(vec2 p, vec2 c)
   return q;
 }
 
-vec2 screenToWorld(vec2 screen) {
-  vec2 result = 2.0 * (screen/uResolution.xy - 0.5);
-  result.x *= uResolution.x/uResolution.y;
-  return result;
-}
+// vec2 screenToWorld(vec2 screen) {
+//   vec2 result = 2.0 * (screen/uResolution.xy - 0.5);
+//   result.x *= uResolution.x/uResolution.y;
+//   return result;
+// }
 
-vec2 screenToWorld2(vec2 screen) {
-  screen.x *= uResolution.x/uResolution.y;
-  return screen;
-}
+// vec2 screenToWorld2(vec2 screen) {
+//   screen.x *= uResolution.x/uResolution.y;
+//   return screen;
+// }
 
 mat3 affineMatrix(vec2 translation, float rotation) {
   return mat3(cos(rotation), -sin(rotation), 0.0,
@@ -76,6 +76,7 @@ mat3 affineMatrix(vec2 translation, float rotation) {
 vec2 transform(vec2 p, vec2 trans, float rotate, float scale) {
   return (-inverse(affineMatrix(trans, rotate)) * vec3(p, 1.0)).xy;
 }
+
 
 vec2 translate(vec2 p, vec2 trans) {
   return transform(p, trans, 0.0, 1.0);

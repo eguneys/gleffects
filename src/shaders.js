@@ -4,18 +4,16 @@ import vMainShader from './shaders/main.vert';
 import fMainShader from './shaders/main.frag';
 import vTextureShader from './shaders/texture.vert';
 import fTextureShader from './shaders/texture.frag';
-import fHoleShader from './shaders/hole.frag';
-import fFieldShader from './shaders/field.frag';
+
+import fBackgroundShader from './shaders/background.frag';
 
 import pFDefsShader from './shaders/defs.partial.frag';
 import pFUtilShader from './shaders/util.partial.frag';
-import pFNumbersShader from './shaders/numbers.partial.frag';
 
 
 const partialShaders = {
   'futil': pFUtilShader,
   'fdefs': pFDefsShader,
-  'fnumbers': pFNumbersShader
 };
 
 const rawShaders = {
@@ -23,8 +21,7 @@ const rawShaders = {
   'fmain': fMainShader,
   'vtexture': vTextureShader,
   'ftexture': fTextureShader,
-  'fhole': fHoleShader,
-  'ffield': fFieldShader
+  'fbg': fBackgroundShader
 };
 
 const regexInclude = /#include (\w+)/;

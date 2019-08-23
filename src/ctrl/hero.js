@@ -37,11 +37,13 @@ export default function hero(ctrl, g) {
       console.log('here');
       hero.mass = 1.0;
       hero.vy = 0;
+      hero.j = hole.radius * 0.5;
       targetY = 0;
     } if (hero.j < -hole.radius * 0.2) {
       console.log('less');
       hero.mass = 1.0;
       hero.vy = 0;
+      hero.j = -hole.radius * 0.2;
       targetY = 0;
     }
   };
@@ -54,6 +56,10 @@ export default function hero(ctrl, g) {
   const maybeJump = delta => {
     if (userJump) {
       userJump = false;
+      jump(delta);
+    }
+    else if (hero.j < 10.0) {
+      ctrl.jumpOver(hero.x, hero.y);
       jump(delta);
     }
   };

@@ -11,6 +11,10 @@ export default function ctrl(state, g) {
   const hero = new makeHero(this, g);
   const hole = new makeHole(this, g);
 
+  this.jumpOver = (x, y) => {
+    hole.doImpact(x, y);
+  };
+
   this.spaceHit = () => {
     hero.userJump();
   };

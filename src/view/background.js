@@ -1,0 +1,26 @@
+import shaderMap from '../shaders';
+
+import * as u from '../util';
+
+import * as G from '../graphics';
+
+export default function view(ctrl, g) {
+
+  const { width, height } = ctrl.data.game;
+
+  const background = g.makeQuad({
+    fSource: shaderMap['fbg'],
+    uniforms: {
+      uMatrix: G.makeUniform3fvSetter("uMatrix")
+    }
+  }, width, height);
+
+  this.render = ctrl => {
+    
+    g.addQuad(background, {}, {
+    });
+
+  };
+
+  
+}

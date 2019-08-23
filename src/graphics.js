@@ -18,26 +18,18 @@ export default function Graphics(state, gl) {
 
   this.minibatch = [];
 
-  this.addHero = (hero, props) => {
-    addQuad(hero, {
-      uSqueeze: [props.squeeze],
-      uTime: [props.tick],
-      ...baseUniforms(props)
-    });
-  };
-
   this.addTexture = (quad, props, uniforms) => {
     addQuad(quad, {
       uTexture: [],
       ...uniforms,
-      ...baseUniforms(props)
+      ...baseUniforms(props, quad)
     });
   };
 
   this.addQuad = (quad, props, uniforms) => {
     addQuad(quad, {
       ...uniforms,
-      ...baseUniforms(props)
+      ...baseUniforms(props, quad)
     });
   };
 
@@ -46,8 +38,13 @@ export default function Graphics(state, gl) {
     translation,
     rotation,
     scale
-  }) =>
+  }, quad) =>
   {
+    pivot = pivot || [quad.width * 0.5, quad.height * 0.5];
+    translation = translation || [0, 0];
+    rotation = rotation || 0;
+    scale = scale || [1.0, 1.0];
+
     const uMatrix = mat3.transform([width, height],
                                   translation,
                                   rotation,

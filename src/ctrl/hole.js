@@ -1,30 +1,20 @@
 import * as u from '../util';
 
 export default function hole(ctrl, g) {
-  const { hole, hero } = ctrl.data;
+  const { hole } = ctrl.data;
 
-  // impact         0.0   ->             1.0
-  // easing(impact) 0.0 -> 1.0 -> 0.9 -> 1.0
-  // map(impact) 0.5 -> 0.0 -> 0.5 -> 1.0 -> 0.5
-
-  const easing = makeEasing([0.5, 0.55, 0.4, 0.8, 0.2, 0.5]);
+  const easing = makeEasing([0.5, 0.55, 0.4, 0.75, 0.35, 0.5]);
   let impact = 0.0;
 
-  const updatePos = delta => {
+  this.doImpact = (x, y) => {
     impact = 1.0;
-    hole.x = hero.x;
-    hole.y = hero.y;
+    hole.x = x;
+    hole.y = y;
   };
 
   this.update = delta => {
 
-    if (impact < 0.01) {
-      updatePos(delta);
-    }
-
     hole.impact = easing(impact);
-
-
     impact += (0.0 - impact) * delta * 0.001;
     
   };
