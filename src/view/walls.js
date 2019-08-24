@@ -22,10 +22,9 @@ export default function view(ctrl, g) {
   );
 
   this.render = ctrl => {
-    ctrl = ctrl.walls;
+    ctrl = ctrl.play.walls;
 
     const { x: wallsX } = ctrl.data;
-    console.log(wallsX);
 
     ctrl.walls.each(wallCtrl => {
       const { x, y } = wallCtrl.data;

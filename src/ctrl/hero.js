@@ -4,30 +4,30 @@ export default function hero(ctrl, g) {
 
   const { width, height, heroWidth, gravity } = ctrl.data.game;
 
-
   let hero;
-  this.init = () => {
-    this.data = {...defaults() };
-    hero = this.data;
+  this.init = (data) => {
+    this.data = hero = { ...defaults() };
   };
   
-  const targetAy = 0.0;
-
   const updatePos = delta => {
     const dt = delta * 0.01;
-    console.log(hero);
+
+    hero.vx += hero.ax * dt;
 
     hero.vy += gravity * dt;
     hero.vy += hero.ay * dt;
 
+    hero.x += hero.vx * dt;
     hero.y += hero.vy * dt;
 
-    hero.ay += (targetAy - hero.ay) * dt * 2.0;
+    hero.ax += (hero.targetAx-hero.ax) * dt * 2.0;
+    hero.ay += -hero.ay * dt * 2.0;
 
   };
 
   const jump = delta => {
-    hero.ay = -600.0;
+    hero.ay = hero.jumpAy;
+    hero.ax = hero.jumpAx;
   };
 
   const maybeJump = delta => {
@@ -49,13 +49,15 @@ export default function hero(ctrl, g) {
 
   const defaults = () => ({
     width: heroWidth,
-    height: heroWidth,
-    x: 0,
+    x: width - heroWidth,
     y: 0,
     vx: 0,
     vy: 0,
     ax: 0,
     ay: 0,
+    targetAx: -10.0,
+    jumpAx: -100.0,
+    jumpAy: -600.0
   });
   
 }

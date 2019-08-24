@@ -20,8 +20,8 @@ export default function view(ctrl, g) {
   }, heroWidth, heroWidth);
 
   this.render = ctrl => {
-    const { tick } = ctrl.data.game;
-    const heroCtrl = ctrl.hero;
+    const { tick } = ctrl.data;
+    const heroCtrl = ctrl.play.hero;
     
     const { x, y } = heroCtrl.data;
 

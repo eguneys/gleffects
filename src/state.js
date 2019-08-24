@@ -11,8 +11,7 @@ export default function defaults(width, height) {
     wallWidth,
     heroWidth,
     ratio,
-    gravity: 50.0,
-    tick: 0
+    gravity: 10.0
   };
 
   return {

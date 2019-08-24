@@ -1,26 +1,25 @@
 import Pool from './pool';
 
-import makeHero from './ctrl/hero';
-import makeWalls from './ctrl/walls';
+import makePlay from './ctrl/play';
 
 export default function ctrl(state, g) {
+  const defaults = () => ({
+    tick: 0
+  });
 
-  this.data = state;
+  this.data = { ...defaults(), ...state };
 
+  this.play = new makePlay(this, g);
 
-  this.hero = new makeHero(this, g);
-  this.walls = new makeWalls(this, g);
-
-  this.hero.init();
-  this.walls.init();
+  this.play.init(this);
 
   this.spaceHit = () => {
-    this.hero.userJump();
+    this.play.hero.userJump();
   };
 
   this.update = delta => {
-    this.data.game.tick += delta;
-    this.hero.update(delta);
-    this.walls.update(delta);
+    this.data.tick++;
+
+    this.play.update(delta);
   };
 }

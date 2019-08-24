@@ -17,6 +17,6 @@ out vec4 outColor;
 
 void main() {
   
-  outColor = colPurpleG;
+  outColor = colYellowG;
   
 }

@@ -19,7 +19,7 @@ export default function view(ctrl, g) {
 
   this.render = ctrl => {
 
-    const { tick } = ctrl.data.game;
+    const { tick } = ctrl.data;
 
     g.addQuad(background, {}, {
       uTime: [tick]

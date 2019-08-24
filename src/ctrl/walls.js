@@ -16,10 +16,10 @@ export default function walls(ctrl, g) {
   };
 
 
-  let lastWallX = 0;
+  let lastWallX = width;
   const addWall = () => {
     const wall = this.walls.acquire(_ => _.init({ x: lastWallX }));
-    lastWallX += wallWidth;
+    lastWallX -= wallWidth;
     return wall;
   };
 
@@ -32,19 +32,8 @@ export default function walls(ctrl, g) {
     }
   };
 
-  const vX = -10.0;
-  const updatePos = delta => {
-    const dt = delta * 0.01;
-
-    this.data.x += vX * dt;
-  };
-
   this.update = delta => {
-
-    updatePos(delta);
-
     this.walls.each(_ => _.update(delta));
-
   };
 
   const defaults = () => ({

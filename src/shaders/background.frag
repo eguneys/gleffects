@@ -24,7 +24,7 @@ void main() {
 
   // colGlowyCircle(col, p);
   // hsprites(col, p);
-  col = colYellowG;
+  col = colPurpleG;
 
 
   outColor = col;

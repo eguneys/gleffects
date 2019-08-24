@@ -5,7 +5,7 @@ import menuView from './view/menu';
 
 export default function view(ctrl, g) {
 
-  const { width, height } = ctrl.data.game;
+  const { width, height } = ctrl.data;
 
   const play = new playView(ctrl, g);
 

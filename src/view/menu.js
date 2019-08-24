@@ -6,9 +6,7 @@ import * as G from '../graphics';
 
 export default function view(ctrl, g) {
 
-  const { width, height } = ctrl.data.game;
-
-  const { textures } = ctrl.data;
+  const { width, height, textures } = ctrl.data;
 
   const mWidth = width * 0.2,
         mHeight = height * 0.2;

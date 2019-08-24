@@ -10,9 +10,7 @@ import wallsView from './walls';
 
 export default function view(ctrl, g) {
 
-  const { textures } = ctrl.data;
-  const { width, height } = ctrl.data.game;
-
+  const { width, height } = ctrl.data;
 
   const back = new backView(ctrl, g);
   const hero = new heroView(ctrl, g);
