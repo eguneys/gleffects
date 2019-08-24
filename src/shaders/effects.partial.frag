@@ -1,9 +1,3 @@
-#define colWhite vec4(1.0)
-#define colBlue vec4(0.0, 0.0, 1.0, 1.0)
-#define colYellow vec4(1.0, 1.0, 0.0, 1.0)
-#define colGB vec4(0.0, 1.0, 1.0, 1.0)
-#define colBlack vec4(0.0, 0.0, 0.0, 1.0)
-
 // https://www.shadertoy.com/view/3llSz4
 void vsprites(out vec4 col, vec2 p) {
 
@@ -100,5 +94,21 @@ void colPulsingRotations(out vec4 col, vec2 p) {
 
 
   col = mix(colBlue, colWhite, way);
+  
+}
+
+// https://www.shadertoy.com/view/4lVXzK
+void colGlowyCircle(out vec4 col, vec2 p) {
+
+  float timer = usin(uTime * 0.005);
+
+  float radius = 2.0/timer;
+
+  float ring = length(p)*4.0 - radius;
+  ring = min(3.0, abs(1.0/(10.0*ring)));
+  ring = max(0.0, ring-timer);
+    
+
+  col = vec4(ring * 0.3, ring+ 0.05, ring - 0.05, 1.0);
   
 }

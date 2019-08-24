@@ -1,0 +1,5 @@
+#define colWhite vec4(1.0)
+#define colBlue vec4(0.0, 0.0, 1.0, 1.0)
+#define colYellow vec4(1.0, 1.0, 0.0, 1.0)
+#define colGB vec4(0.0, 1.0, 1.0, 1.0)
+#define colBlack vec4(0.0, 0.0, 0.0, 1.0)

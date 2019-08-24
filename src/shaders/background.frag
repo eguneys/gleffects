@@ -11,6 +11,7 @@ in vec2 vQuadCoord;
 
 out vec4 outColor;
 
+#include fcolors
 #include futil
 #include feffects
 
@@ -21,9 +22,9 @@ void main() {
 
   vec4 col = vec4(0.5, 0.5, 0.5, 0.0);
 
+  // colGlowyCircle(col, p);
   hsprites(col, p);
-  // colHalfCircle(col, p);
-  //colPulsingRotations(col, p);
+
 
   outColor = col;
 }

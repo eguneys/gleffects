@@ -7,6 +7,7 @@ import fTextureShader from './shaders/texture.frag';
 
 import fBackgroundShader from './shaders/background.frag';
 
+import pFColorsShader from './shaders/colors.partial.frag';
 import pFDefsShader from './shaders/defs.partial.frag';
 import pFUtilShader from './shaders/util.partial.frag';
 
@@ -17,6 +18,7 @@ import pFEffectsShader from './shaders/effects.partial.frag';
 const partialShaders = {
   'futil': pFUtilShader,
   'fdefs': pFDefsShader,
+  'fcolors': pFColorsShader,
   'feffects': pFEffectsShader
 };
 
