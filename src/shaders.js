@@ -1,7 +1,8 @@
 import { objMap } from './util2';
 
 import vMainShader from './shaders/main.vert';
-import fMainShader from './shaders/main.frag';
+import fHeroShader from './shaders/hero.frag';
+import fWallShader from './shaders/wall.frag';
 import vTextureShader from './shaders/texture.vert';
 import fTextureShader from './shaders/texture.frag';
 
@@ -24,7 +25,8 @@ const partialShaders = {
 
 const rawShaders = {
   'vmain': vMainShader,
-  'fmain': fMainShader,
+  'fhero': fHeroShader,
+  'fwall': fWallShader,
   'vtexture': vTextureShader,
   'ftexture': fTextureShader,
   'fbg': fBackgroundShader

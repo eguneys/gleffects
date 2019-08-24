@@ -26,7 +26,7 @@ export default function Graphics(state, gl) {
     });
   };
 
-  this.addQuad = (quad, props, uniforms) => {
+  this.addQuad = (quad, props, uniforms = {}) => {
     addQuad(quad, {
       ...uniforms,
       ...baseUniforms(props, quad)

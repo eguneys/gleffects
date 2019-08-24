@@ -14,9 +14,11 @@ export default function view(ctrl, g) {
   this.render = ctrl => {
     
     play.render(ctrl);
-
     // menu.render(ctrl);
+  };
 
+  this.release = () => {
+    play.release();
   };
 
 }

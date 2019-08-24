@@ -1,65 +1,38 @@
-import * as util from '../util';
+import * as u from '../util';
 
 export default function hero(ctrl, g) {
 
-  const { width, height } = ctrl.data.game;
-  const aspect = height / width;
+  const { width, height, heroWidth, gravity } = ctrl.data.game;
 
-  const { hole, hero } = ctrl.data;
 
-  let targetY = 0;
-
-  const updateXY = () => {
-    const c = Math.cos(hero.theta) * (hole.radius - hero.j) / aspect,
-          s = Math.sin(hero.theta) * (hole.radius - hero.j);
-
-    hero.x = width * 0.5 - hero.width * 0.5 + c,
-    hero.y = height * 0.5 - hero.width * 0.5 + s;
+  let hero;
+  this.init = () => {
+    this.data = {...defaults() };
+    hero = this.data;
   };
   
+  const targetAy = 0.0;
+
   const updatePos = delta => {
-    const theta = hero.w * delta * 0.01;
+    const dt = delta * 0.01;
+    console.log(hero);
 
-    hero.theta += theta;
+    hero.vy += gravity * dt;
+    hero.vy += hero.ay * dt;
 
-    updateXY();
+    hero.y += hero.vy * dt;
 
-    const aGy = hole.fG / hero.mass;
+    hero.ay += (targetAy - hero.ay) * dt * 2.0;
 
-    hero.vy += aGy * delta * 0.01;
-    hero.vy += hero.aCy * delta * 0.01;
-
-    hero.j += hero.vy * delta * 0.01;
-
-    hero.j += (targetY - hero.j) * delta * 0.002;
-
-    if (hero.j >= hole.radius * 0.5) {
-      console.log('here');
-      hero.mass = 1.0;
-      hero.vy = 0;
-      hero.j = hole.radius * 0.5;
-      targetY = 0;
-    } if (hero.j < -hole.radius * 0.2) {
-      console.log('less');
-      hero.mass = 1.0;
-      hero.vy = 0;
-      hero.j = -hole.radius * 0.2;
-      targetY = 0;
-    }
   };
 
   const jump = delta => {
-    //console.log('jump');
-    hero.mass = 0.02;
+    hero.ay = -600.0;
   };
 
   const maybeJump = delta => {
     if (userJump) {
       userJump = false;
-      jump(delta);
-    }
-    else if (hero.j < 10.0) {
-      ctrl.jumpOver(hero.x, hero.y);
       jump(delta);
     }
   };
@@ -73,5 +46,16 @@ export default function hero(ctrl, g) {
     maybeJump(delta);
     updatePos(delta);
   };
+
+  const defaults = () => ({
+    width: heroWidth,
+    height: heroWidth,
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+    ax: 0,
+    ay: 0,
+  });
   
 }
