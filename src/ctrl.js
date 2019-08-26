@@ -1,3 +1,5 @@
+import * as u from './util';
+
 import Pool from './pool';
 
 import makePlay from './ctrl/play';
@@ -14,7 +16,12 @@ export default function ctrl(state, g) {
   this.play.init(this);
 
   this.spaceHit = () => {
-    this.play.hero.userJump();
+    if (this.data.state === u.States.Play) {
+      this.play.hero.userJump();
+    } else {
+      this.play.init(this);
+      this.data.state = u.States.Play;
+    }
   };
 
   this.update = delta => {

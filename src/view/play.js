@@ -27,6 +27,7 @@ export default function view(ctrl, g) {
 
   this.release = () => {
     walls.release();
+    hero.release();
   };
 
 }

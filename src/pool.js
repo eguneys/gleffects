@@ -1,4 +1,10 @@
-export default function Pool(makeItem) {
+export default function Pool(makeItem, opts) {
+  const defaults = () => ({
+    name: 'pool',
+    warnLeak: 50
+  });
+
+  opts = { ...defaults(), ...opts };
 
   const makeId = (() => {
     let n = 0;
@@ -8,10 +14,22 @@ export default function Pool(makeItem) {
   let alive = [],
       dead = [];
 
+  this.name = () => opts.name;
+
   this.alives = () => alive.length;
+  this.total = () => dead.length + alive.length;
+
+  this.warnLeak = () => opts.warnLeak;
+
+  this.toString = () => {
+    return `[${this.name()} alives: ${this.alives()} deads: ${dead.length}]`;
+  };
 
   this.acquire = (onInit = () => {}) => {
     let item;
+    if (this.total() > this.warnLeak()) {
+      console.warn(`possible pool leak at ${this.name()}.`);
+    }
     if (dead.length > 0) {
       item = dead.pop();
     } else {
@@ -31,7 +49,7 @@ export default function Pool(makeItem) {
   };
 
   this.releaseAll = () => {
-    alive.forEach(_ => dead.push(_));
+    dead = [...dead, ...alive];
     alive = [];
   };
 

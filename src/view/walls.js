@@ -2,7 +2,6 @@ import * as u from '../util';
 import shaderMap from '../shaders';
 
 import Pool from '../pool';
-import PoolShare from '../poolshare';
 
 import * as G from '../graphics';
 
@@ -19,7 +18,7 @@ export default function view(ctrl, g) {
         uMatrix: G.makeUniform3fvSetter('uMatrix')
       }
     }, wallWidth, wallWidth)
-  );
+    , { name: 'wallQuads' } );
 
   this.render = ctrl => {
     const { x: cameraX } = ctrl.play.camera.data;

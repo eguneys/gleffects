@@ -1,3 +1,8 @@
+export const States = {
+  Over: 'over',
+  Play: 'play'
+};
+
 export const PI = Math.PI;
 export const HALFPI = PI / 2;
 export const THIRDPI = PI / 3;
@@ -32,3 +37,24 @@ export function round(v, d = 100) {
 export function now() {
   return Date.now();
 }
+
+export const ensureDelay = (start, fn, delay = 1000) => {
+  if (now() - start > delay) {
+    fn();
+  }
+};
+
+export const withDelay = (fn, delay, updateFn) => {
+  let lastUpdate = 0;
+
+  return (delta) => {
+    lastUpdate += delta;
+    if (lastUpdate >= delay) {
+      fn();
+      lastUpdate = 0;
+    } else {
+      if (updateFn)
+        updateFn(lastUpdate / delay);
+    }
+  };
+};

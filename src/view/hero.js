@@ -1,6 +1,7 @@
 import shaderMap from '../shaders';
 
 import * as u from '../util';
+import Pool from '../pool';
 
 import * as G from '../graphics';
 
@@ -19,7 +20,18 @@ export default function view(ctrl, g) {
     }
   }, heroWidth, heroWidth);
 
-  this.render = ctrl => {
+
+  let bulletQuads = new Pool(id => 
+    g.makeQuad({
+      name: 'bullet' + id,
+      fSource: shaderMap['fhero'],
+      uniforms: {
+        uMatrix: G.makeUniform3fvSetter("uMatrix")      
+      }
+    }, heroWidth * 0.3, heroWidth * 0.3)
+    , { name: 'bulletQuad' });
+
+  const renderHero = ctrl => {
     const { tick } = ctrl.data;
     const heroCtrl = ctrl.play.hero;
     
@@ -32,7 +44,27 @@ export default function view(ctrl, g) {
     }, {
       uTime: [tick]
     });
-
   };
 
+  const renderBullet = (ctrl, bulletCtrl) => {
+    const { x: cameraX } = ctrl.play.camera.data;
+
+    const { x, y } = bulletCtrl.data;
+
+    let quad = bulletQuads.acquire();
+    g.addQuad(quad, {
+      translation: [x - cameraX, y]
+    });
+  };
+
+  this.render = ctrl => {
+    renderHero(ctrl);
+
+    ctrl.play.bullets.bullets.each(bulletCtrl =>
+      renderBullet(ctrl, bulletCtrl));    
+  };
+
+  this.release = () => {
+    bulletQuads.releaseAll();
+  };
 }

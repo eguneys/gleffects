@@ -38,6 +38,9 @@ export default function hero(ctrl, g) {
     if (doubleJump === 1) {
       hero.vx *= 2;
     }
+    if (doubleJump === 2) {
+      hero.vy *= 0.8;
+    }
   };
 
 
@@ -52,7 +55,9 @@ export default function hero(ctrl, g) {
 
   const maybeDie = delta => {
     if (hero.y - heroWidth > height) {
-      console.log('die');
+      if (ctrl.data.gameover === 0) {
+        ctrl.data.gameover = u.now();
+      }
     }
   };
 

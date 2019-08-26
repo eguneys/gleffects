@@ -9,12 +9,14 @@ export default function camera(ctrl, g) {
     this.data = camera = { ...defaults() };
   };
 
+  let centerAt = width * 0.2;
+
   this.update = delta => {
     const hero = ctrl.hero,
           { x: heroX } = hero.data;
 
-    if (heroX < width / 2) {
-      camera.x = heroX - (width / 2);
+    if (heroX < centerAt) {
+      camera.x = heroX - centerAt;
     }
   };
 

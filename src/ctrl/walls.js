@@ -10,18 +10,18 @@ export default function walls(ctrl, g) {
 
   this.fallingWalls = new Pool(() => new makeWall(ctrl, g));
 
+  let lastWallX;
+
   this.init = () => {
+    lastWallX = width;
     this.data = defaults();
     this.walls.releaseAll();
-
 
     const bWidth = 20,
           bHeight = height * 0.5 - wallWidth;
     addBuilding(bWidth, bHeight);
   };
 
-
-  let lastWallX = width;
 
   const addGap = () => {
     lastWallX -= wallWidth * 2.0;
@@ -44,7 +44,7 @@ export default function walls(ctrl, g) {
   const maybeSpawnWalls = delta => {
     const { x: cameraX } = ctrl.camera.data;
 
-    if (lastWallX + width > cameraX) {
+    if (lastWallX > cameraX) {
       const bHeight = u.randInt(height * 0.1, height * 0.4),
             bWidth = u.randInt(8, 20);
       addBuilding(bWidth, bHeight);
