@@ -36,7 +36,7 @@ export function app(element, options) {
     view.render(ctrl);
     graphics.render();
     view.release();
-  }, 10).start();
+  }, 60).start();
 
   events.bindDocument(ctrl);
 

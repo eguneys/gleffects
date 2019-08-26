@@ -8,32 +8,76 @@ export default function walls(ctrl, g) {
 
   this.walls = new Pool(() => new makeWall(ctrl, g));
 
+  this.fallingWalls = new Pool(() => new makeWall(ctrl, g));
+
   this.init = () => {
     this.data = defaults();
     this.walls.releaseAll();
 
-    addBuilding();
+
+    const bWidth = 20,
+          bHeight = height * 0.5 - wallWidth;
+    addBuilding(bWidth, bHeight);
   };
 
 
   let lastWallX = width;
-  const addWall = () => {
-    const wall = this.walls.acquire(_ => _.init({ x: lastWallX }));
-    lastWallX -= wallWidth;
+
+  const addGap = () => {
+    lastWallX -= wallWidth * 2.0;
+  };
+
+  const addWall = (height) => {
+    const wall = this.walls.acquire(_ => _.init({ height, x: lastWallX }));
+
+    lastWallX -= wall.data.width * 1.0;
     return wall;
   };
 
-  const addBuilding = () => {
-    
-    const width = 3;
+  const addBuilding = (bWidth, bHeight) => {
+    for (let i = 0; i < bWidth; i++) {
+      addWall(bHeight);
+    }
+    addGap();
+  };
 
-    for (let i = 0; i < width; i++) {
-      addWall();
+  const maybeSpawnWalls = delta => {
+    const { x: cameraX } = ctrl.camera.data;
+
+    if (lastWallX + width > cameraX) {
+      const bHeight = u.randInt(height * 0.1, height * 0.4),
+            bWidth = u.randInt(8, 20);
+      addBuilding(bWidth, bHeight);
     }
   };
 
+  const onWallRelease = wall => {
+    this.fallingWalls.acquire(_ => {
+      _.init({
+        x: wall.data.x,
+        height: wall.data.height,
+        falling: true
+      });
+    });
+  };
+
+  const maybeFallWalls = delta => {
+    const { x: cameraX } = ctrl.camera.data;
+
+    this.walls.releaseIf(wall =>
+      wall.data.x < width * 0.5 &&
+      wall.data.x - width * 0.5 > cameraX, 
+      onWallRelease);
+
+    this.fallingWalls.releaseIf(wall =>
+      wall.data.x - width > cameraX);
+  };
+
   this.update = delta => {
+    maybeSpawnWalls(delta);
+    maybeFallWalls(delta);
     this.walls.each(_ => _.update(delta));
+    this.fallingWalls.each(_ => _.update(delta));
   };
 
   const defaults = () => ({
@@ -43,20 +87,33 @@ export default function walls(ctrl, g) {
 
 function makeWall(ctrl, g) {
 
-  const { width, height } = ctrl.data.game;
+  const { width, height, gravity, wallWidth } = ctrl.data.game;
 
   this.init = d => {
     this.data = { ...defaults(), ...d };
+    this.data.y = height - this.data.height;
   };
 
   const updatePos = (delta) => {
 
-    this.data.y = height - this.data.height;
-    
+  };
+
+  const updateFall = delta => {
+    const dt = delta * 0.01;
+
+    this.data.rotation += -(u.PI * 0.2) * dt;
+    this.data.y += gravity * dt;
+  };
+
+  const maybeFall = delta => {
+    if (this.data.falling) {
+      updateFall(delta);
+    }
   };
   
   this.update = delta => {
 
+    maybeFall(delta);
     updatePos(delta);
   
   };
@@ -64,6 +121,9 @@ function makeWall(ctrl, g) {
 
   const defaults = () => ({
     x: 0,
-    height: height * 0.3,
+    width: wallWidth,
+    height: wallWidth,
+    rotation: 0,
+    falling: false
   });
 }

@@ -23,10 +23,12 @@ export default function view(ctrl, g) {
     const { tick } = ctrl.data;
     const heroCtrl = ctrl.play.hero;
     
+    const { x: cameraX } = ctrl.play.camera.data;
+
     const { x, y } = heroCtrl.data;
 
     g.addQuad(heroQuad, {
-      translation: [x, y]
+      translation: [x - cameraX, y]
     }, {
       uTime: [tick]
     });

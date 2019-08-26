@@ -8,6 +8,10 @@ export function rand(min, max) {
   return Math.random() * (max - min) + min;
 }
 
+export function randInt(min, max) {
+  return Math.floor(rand(min, max));
+}
+
 export function clamp(min, max, v) {
   return Math.min(Math.max(v, min), max);
 }
@@ -23,4 +27,8 @@ export function smoothstep (min, max, value) {
 
 export function round(v, d = 100) {
   return Math.round(v * d) / d;
+}
+
+export function now() {
+  return Date.now();
 }

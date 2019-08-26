@@ -13,6 +13,8 @@ export default function ctrl(ctrl, g) {
   let play;
   this.init = () => {
     play = {};
+
+    this.camera.init();
     this.hero.init();
     this.walls.init();
   };
@@ -24,5 +26,7 @@ export default function ctrl(ctrl, g) {
   this.update = delta => {
     this.hero.update(delta);
     this.walls.update(delta);
+    this.camera.update(delta);
+
   };
 }

@@ -10,14 +10,14 @@ export default function Pool(makeItem) {
 
   this.alives = () => alive.length;
 
-  this.acquire = (initItem = () => {}) => {
+  this.acquire = (onInit = () => {}) => {
     let item;
     if (dead.length > 0) {
       item = dead.pop();
     } else {
       item = makeItem(makeId());
     }
-    initItem(item);
+    onInit(item);
     alive.push(item);
     return item;
 
@@ -35,8 +35,29 @@ export default function Pool(makeItem) {
     alive = [];
   };
 
+  this.releaseIf = (p, onRelease = () => {}) => {
+    let release = [],
+        keep = [];
+
+    alive.forEach(_ => {
+      if (p(_)) {
+        onRelease(_);
+        release.push(_);
+      } else {
+        keep.push(_);
+      }
+    });
+
+    alive = keep;
+    dead = [...release, ...dead];
+  };
+
   this.each = (f) => {
     alive.forEach(f);
+  };
+
+  this.find = p => {
+    return alive.find(p);
   };
 
 }

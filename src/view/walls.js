@@ -22,16 +22,25 @@ export default function view(ctrl, g) {
   );
 
   this.render = ctrl => {
-    ctrl = ctrl.play.walls;
+    const { x: cameraX } = ctrl.play.camera.data;
 
-    const { x: wallsX } = ctrl.data;
+    const wallsCtrl = ctrl.play.walls;
 
-    ctrl.walls.each(wallCtrl => {
+    wallsCtrl.walls.each(wallCtrl => {
       const { x, y } = wallCtrl.data;
       let quad = wallQuads.acquire();
       g.addQuad(quad, {
-        translation: [wallsX + x, y]
+        translation: [x - cameraX, y]
       });
+    });
+
+    wallsCtrl.fallingWalls.each(fallingCtrl => {
+      const { x, y, rotation } = fallingCtrl.data;
+      let quad = wallQuads.acquire();
+      g.addQuad(quad, {
+        translation: [x - cameraX, y],
+        rotation
+      });      
     });
   };
 
