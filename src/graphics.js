@@ -18,7 +18,7 @@ export default function Graphics(state, gl) {
 
   this.minibatch = [];
 
-  this.addTexture = (quad, props, uniforms) => {
+  this.addTexture = (quad, props = {}, uniforms = {}) => {
     addQuad(quad, {
       uTexture: [],
       ...uniforms,
@@ -26,7 +26,7 @@ export default function Graphics(state, gl) {
     });
   };
 
-  this.addQuad = (quad, props, uniforms = {}) => {
+  this.addQuad = (quad, props = {}, uniforms = {}) => {
     addQuad(quad, {
       ...uniforms,
       ...baseUniforms(props, quad)

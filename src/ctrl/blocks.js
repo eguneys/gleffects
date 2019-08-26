@@ -9,6 +9,7 @@ export default function blocks(ctrl, g) {
 
   this.init = () => {
     this.data = {};
+    this.blocks.releaseAll();
   };
 
   const maybeSpawnBlock = u.withRandomDelay(() => {
@@ -47,9 +48,12 @@ function makeBlock(ctrl, g) {
   };
 
   this.update = delta => {
+    const { level } = ctrl.data;
+
     const dt = delta * 0.01;
 
     this.data.x += heroVx * 2.0 * dt;
+    this.data.x += heroVx * dt * level * 0.1;
   };
 
   const defaults = () => ({

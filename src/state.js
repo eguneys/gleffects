@@ -11,6 +11,7 @@ export default function defaults(width, height) {
 
   const game = {
     state: u.States.Over,
+    highscore: 0,
     width,
     height,
     wallWidth,

@@ -55,7 +55,7 @@ export default function hero(ctrl, g) {
 
   const maybeDie = delta => {
     if (hero.y - heroWidth > height ||
-        hero.y < 0) {
+        hero.y + heroWidth < 0) {
       if (ctrl.data.gameover === 0) {
         ctrl.data.gameover = u.now();
       }

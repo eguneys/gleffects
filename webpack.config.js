@@ -2,6 +2,7 @@ var path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const devConfig = {
   mode: 'development',
@@ -89,7 +90,10 @@ const prodConfig = {
       template: 'src/index.html',
       inject: 'head'
     }),
-    new MiniCssExtractPlugin({})
+    new MiniCssExtractPlugin({}),
+    new CopyPlugin([
+      { from: 'assets/font_10.png', to: 'assets' }
+    ])
   ]
 };
 
