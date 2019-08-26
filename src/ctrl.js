@@ -24,8 +24,14 @@ export default function ctrl(state, g) {
     }
   };
 
+  this.spaceRelease = () => {
+    if (this.data.state === u.States.Play) {
+      this.play.hero.userReleaseJump();
+    }
+  };
+
   this.update = delta => {
-    this.data.tick++;
+    this.data.tick += delta;
 
     this.play.update(delta);
   };

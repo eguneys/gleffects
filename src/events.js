@@ -21,6 +21,8 @@ function unbindable(el, eventName, callback) {
 function endMove(ctrl) {
   return function(e) {
     switch (e.code) {
+    case 'Space':
+      ctrl.spaceRelease();
     }
   };
 }

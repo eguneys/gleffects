@@ -13,12 +13,21 @@ export default function blocks(ctrl, g) {
 
   const maybeSpawnBlock = u.withRandomDelay(() => {
     const { x: cameraX } = ctrl.camera.data;
+
+    if (cameraX > -width) {
+      return;
+    }
+
     this.blocks.acquire(_ => _.init({
       x: cameraX + width,
       y: u.rand(height * 0.2, height * 0.5)
     }));
 
-    this.blocks.releaseIf(_ => _.data.x < cameraX);
+    this.blocks.releaseIf(_ => _.data.x - _.data.width * 0.5 < cameraX, () => {
+      if (ctrl.data.gameover === 0) {
+        ctrl.data.gameover = u.now();
+      }
+    });
   }, () => u.randInt(1000, 2000));
  
   this.update = delta => {
@@ -40,11 +49,13 @@ function makeBlock(ctrl, g) {
   this.update = delta => {
     const dt = delta * 0.01;
 
-    this.data.x += heroVx * 0.5 + dt;
+    this.data.x += heroVx * 2.0 * dt;
   };
 
   const defaults = () => ({
     x: width,
-    y: height * 0.5
+    y: height * 0.5,
+    width: 100,
+    height: 100
   });
 }

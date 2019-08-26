@@ -30,30 +30,32 @@ export default function hero(ctrl, g) {
     wallForce = 0;
   };
 
-  let doubleJump = 0;
   const jump = delta => {
     wallForce = 0;
-    hero.vy = -hero.jumpVy;
-    if (doubleJump === 1) {
-      hero.vx *= 2;
-    }
-    if (doubleJump === 2) {
-      hero.vy *= 0.8;
-    }
+    hero.vy = -hero.jumpVy * 0.5;
   };
 
 
-  let userJump = false;
+  let jumpStart = 0,
+      jumpCancel = false;
   const maybeJump = delta => {
-    if (userJump && doubleJump < 2) {
-      userJump = false;
-      doubleJump++;
+    if (jumpStart > 0 && !jumpCancel) {
+      u.ensureDelay(jumpStart, () => {
+        jumpCancel = true;
+        hero.vy = -hero.jumpVy;
+      }, 1000);
       jump(delta);
+    } else {
+      if (hero.vy > 0 && hero.vy < 10) {
+        jumpCancel = false;
+        jumpStart = 0;
+      }
     }
   };
 
   const maybeDie = delta => {
-    if (hero.y - heroWidth > height) {
+    if (hero.y - heroWidth > height ||
+        hero.y < 0) {
       if (ctrl.data.gameover === 0) {
         ctrl.data.gameover = u.now();
       }
@@ -61,10 +63,11 @@ export default function hero(ctrl, g) {
   };
 
   const hitWall = (wall) => {
-    doubleJump = 0;
     wallForce = -gravity;
     hero.vy = 0;
     hero.y = wall.data.y - hero.height;
+    jumpCancel = false;
+    jumpStart = 0;
   };
 
   const updateCollisionsBetween = () => {
@@ -83,7 +86,13 @@ export default function hero(ctrl, g) {
 
 
   this.userJump = () => {
-    userJump = true;
+    if (jumpStart === 0 && !jumpCancel) {
+      jumpStart = u.now();
+    }
+  };
+
+  this.userReleaseJump = () => {
+    jumpCancel = true;
   };
 
   this.update = delta => {

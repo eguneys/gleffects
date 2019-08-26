@@ -2,11 +2,15 @@
 
 #include fcolors
 #include fdefs
+
+#define statePlay 0.0
+#define stateOver 1.0
  
 precision mediump float;
 
 uniform vec2 uResolution;
 uniform float uTime;
+uniform float uState;
 
 in vec2 vQuadCoord;
 
@@ -24,7 +28,11 @@ void main() {
 
   // colGlowyCircle(col, p);
   // hsprites(col, p);
-  col = colPurpleG;
+  if (uState == statePlay) {
+    col = colPurpleG;
+  } else {
+    hsprites(col, p);
+  }
 
 
   outColor = col;
