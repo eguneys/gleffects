@@ -4,6 +4,7 @@ import makeCamera from './camera';
 import makeHero from './hero';
 import makeWalls from './walls';
 import makeBullets from './bullets';
+import makeBlocks from './blocks';
 
 export default function ctrl(ctrl, g) {
 
@@ -13,6 +14,7 @@ export default function ctrl(ctrl, g) {
   this.hero = new makeHero(this, g);
   this.walls = new makeWalls(this, g);
   this.bullets = new makeBullets(this, g);
+  this.blocks = new makeBlocks(this, g);
 
   let play;
   this.init = () => {
@@ -21,6 +23,7 @@ export default function ctrl(ctrl, g) {
     this.hero.init();
     this.walls.init();
     this.bullets.init();
+    this.blocks.init();
   };
 
   this.spaceHit = () => {
@@ -43,7 +46,7 @@ export default function ctrl(ctrl, g) {
     this.hero.update(delta);
     this.walls.update(delta);
     this.bullets.update(delta);
+    this.blocks.update(delta);
     this.camera.update(delta);
-
   };
 }

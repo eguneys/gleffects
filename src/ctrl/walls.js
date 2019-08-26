@@ -16,6 +16,7 @@ export default function walls(ctrl, g) {
     lastWallX = width;
     this.data = defaults();
     this.walls.releaseAll();
+    this.fallingWalls.releaseAll();
 
     const bWidth = 20,
           bHeight = height * 0.5 - wallWidth;

@@ -4,7 +4,7 @@ import * as c from '../collision';
 
 export default function hero(ctrl, g) {
 
-  const { width, height, wallWidth, heroWidth, gravity } = ctrl.data.game;
+  const { width, height, wallWidth, heroWidth, gravity, heroVx } = ctrl.data.game;
 
   let hero;
   this.init = (data) => {
@@ -12,7 +12,6 @@ export default function hero(ctrl, g) {
   };
 
   let wallForce = 0;
-  const targetVx = -gravity * 4.0;
   const updatePos = delta => {
     const dt = delta * 0.01;
 
@@ -26,7 +25,7 @@ export default function hero(ctrl, g) {
 
     updateCollisionsBetween(oldY, hero.y);
 
-    hero.vx += (targetVx - hero.vx) * dt;
+    hero.vx += (heroVx - hero.vx) * dt;
 
     wallForce = 0;
   };
