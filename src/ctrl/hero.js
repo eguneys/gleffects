@@ -11,14 +11,17 @@ export default function hero(ctrl, g) {
     this.data = hero = { ...defaults() };
   };
 
+  let scaleGrav = 1.0,
+      scaleVy = 1.0;
+
   let wallForce = 0;
   const updatePos = delta => {
     const dt = delta * 0.01;
 
     const oldY = hero.y;
 
-    hero.vy += wallForce * dt;
-    hero.vy += gravity * dt;
+    hero.vy += wallForce * dt * scaleVy;
+    hero.vy += gravity * dt * scaleGrav;
 
     hero.x += hero.vx * dt;
     hero.y += hero.vy * dt;
@@ -33,6 +36,8 @@ export default function hero(ctrl, g) {
   const jump = delta => {
     wallForce = 0;
     hero.vy = -hero.jumpVy * 0.5;
+    scaleGrav = 4.0;
+    scaleVy = 50.0;
   };
 
 
@@ -40,16 +45,16 @@ export default function hero(ctrl, g) {
       jumpCancel = false;
   const maybeJump = delta => {
     if (jumpStart > 0 && !jumpCancel) {
-      u.ensureDelay(jumpStart, () => {
-        jumpCancel = true;
-        hero.vy = -hero.jumpVy;
-      }, 1000);
+      // u.ensureDelay(jumpStart, () => {
+      //   jumpCancel = true;
+      //   hero.vy = -hero.jumpVy;
+      // }, 1000);
       jump(delta);
     } else {
-      if (hero.vy > 0 && hero.vy < 10) {
-        jumpCancel = false;
-        jumpStart = 0;
-      }
+      // if (hero.vy > 0 && hero.vy < 10) {
+      //   jumpCancel = false;
+      //   jumpStart = 0;
+      // }
     }
   };
 
@@ -86,6 +91,7 @@ export default function hero(ctrl, g) {
 
 
   this.userJump = () => {
+    jumpCancel = false;
     if (jumpStart === 0 && !jumpCancel) {
       jumpStart = u.now();
     }

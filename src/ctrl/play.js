@@ -43,7 +43,9 @@ export default function ctrl(ctrl, g) {
   };
 
   const maybeIncreaseLevel = u.withDelay(() => {
-    ctrl.data.game.level++;
+    if (this.data.gameover === 0) {
+      ctrl.data.level++;
+    }
   }, 2000);
 
   const maybeUpdateScore = delta => {
