@@ -40,6 +40,8 @@ export default function view(ctrl, g) {
     const { x, y } = heroCtrl.data;
 
     g.addQuad(heroQuad, {
+      width: heroWidth,
+      height: heroWidth,
       translation: [x - cameraX, y]
     }, {
       uTime: [tick]
@@ -53,6 +55,8 @@ export default function view(ctrl, g) {
 
     let quad = bulletQuads.acquire();
     g.addQuad(quad, {
+      width: heroWidth * 0.3,
+      height: heroWidth * 0.3,
       translation: [x - cameraX, y]
     });
   };

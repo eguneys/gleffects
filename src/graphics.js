@@ -15,6 +15,7 @@ export default function Graphics(state, gl) {
   gl.enable(gl.BLEND);
   gl.disable(gl.DEPTH_TEST);
 
+  this.gl = gl;
 
   this.minibatch = [];
 
@@ -26,21 +27,25 @@ export default function Graphics(state, gl) {
     });
   };
 
-  this.addQuad = (quad, props = {}, uniforms = {}) => {
+  this.addQuad = (quad, props = {}, uniforms = {}, numVertices) => {
     addQuad(quad, {
       ...uniforms,
       ...baseUniforms(props, quad)
-    });
+    }, numVertices);
   };
 
   const baseUniforms = ({
+    width : w,
+    height : h,
     pivot,
     translation,
     rotation,
     scale
   }, quad) =>
   {
-    pivot = pivot || [quad.width * 0.5, quad.height * 0.5];
+    w = w || width;
+    h = h || height;
+    pivot = pivot || [w * 0.5, h * 0.5];
     translation = translation || [0, 0];
     rotation = rotation || 0;
     scale = scale || [1.0, 1.0];
@@ -57,7 +62,7 @@ export default function Graphics(state, gl) {
     };
   };
 
-  const addQuad = (quad, uniformArgs) => {
+  const addQuad = (quad, uniformArgs, numVertices = 6) => {
     const cookUniforms = Object.keys(quad.uniforms).map(key => {
       let setter = quad.uniforms[key];
       let args = uniformArgs[key];
@@ -68,158 +73,85 @@ export default function Graphics(state, gl) {
         setter(...args);
       };
     });
-    this.minibatch.push({...quad, uniforms: cookUniforms });
+    this.minibatch.push({...quad, uniforms: cookUniforms, numVertices });
   };
 
-  this.makeQuad = ({
-    name,
-    vSource,
-    fSource,
-    uniforms
-  }, width, height) => {
-    vSource = vSource || shaderMap['vmain'];
 
+  const makeProgram = (vSource, fSource) => {
     let vShader = createShader(gl, gl.VERTEX_SHADER, vSource);
     let fShader = createShader(gl, gl.FRAGMENT_SHADER, fSource);
 
     let program = createProgram(gl, vShader, fShader);
 
-    let posAttrLocation = gl.getAttribLocation(program, "aPosition");
-    let posBuffer = gl.createBuffer();
+    return program;
+  };
 
-    let vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-
-    gl.enableVertexAttribArray(posAttrLocation);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-    
+  this.makeQuad = (drawInfo,
+                   width,
+                   height) =>
+  {
 
     let left = 0,
         right = width,
         down = 0,
         up = height;
-    /*
-      (-1, 1).( 1, 1)
-      .
-      (-1,-1).( 1,-1)
-    */
-    let positions = [
-      left, down,
-      left, up,
-      right, down,
-      left, up,
-      right, down,
-      right, up
-    ];
+    let positionPoss = [left, down,
+                        left, up,
+                        right, down,
+                        left, up,
+                        right, down,
+                        right, up];
 
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-
-    let size = 2,
-        type = gl.FLOAT,
-        normalize = false,
-        stride = 0,
-        offset = 0;
-
-    gl.vertexAttribPointer(posAttrLocation, 
-                           size,
-                           type,
-                           normalize,
-                           stride,
-                           offset);
-
-
-    let texCoordAttrLocation = gl.getAttribLocation(program, "aTexCoord");
-
-    let texCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-
-    left = -1,
-    right = 1,
-    down = -1,
+    left = -1;
+    right = 1;
+    down = -1;
     up = 1;
-    /*
-      (-1, 1).( 1, 1)
-      .
-      (-1,-1).( 1,-1)
-    */
-    positions = [
-      left, down,
-      left, up,
-      right, down,
-      left, up,
-      right, down,
-      right, up
+    
+    let texCoordPoss = [left, down,
+                        left, up,
+                        right, down,
+                        left, up,
+                        right, down,
+                        right, up];
+
+    const posInfo = new makeBufferInfoForAttribute("aPosition", 2),
+          texInfo = new makeBufferInfoForAttribute("aTexCoord", 2);
+
+    let bufferInfos = [
+      posInfo,
+      texInfo
     ];
 
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    let res = this.makeDraw({...drawInfo, bufferInfos });
 
-    gl.enableVertexAttribArray(texCoordAttrLocation);
+    posInfo.set(positionPoss, gl.STATIC_DRAW);
+    texInfo.set(texCoordPoss, gl.STATIC_DRAW);
 
-    size = 2,
-    type = gl.FLOAT,
-    normalize = true,
-    stride = 0,
-    offset = 0;
+    return res;
+  };
 
-    gl.vertexAttribPointer(texCoordAttrLocation, 
-                           size,
-                           type,
-                           normalize,
-                           stride,
-                           offset);
+  this.makeDraw = ({
+    name,
+    vSource,
+    fSource,
+    uniforms,
+    textureInfos,
+    bufferInfos
+  }) => {
+    vSource = vSource || shaderMap['vmain'];
+    textureInfos = textureInfos || [];
+
+    let program = makeProgram(vSource, fSource);
+
+    let vao = makeVao(gl, bufferInfos.map(_ => _.apply(gl, program)));
 
     return {
       name,
-      width,
-      height,
       program,
       vao,
+      textureInfos: textureInfos.map(_ => _.apply(gl, program)),
       uniforms: objMap(uniforms, (_, v) => v(gl, program))
     };
-  };
-
-  this.makeSprite = ({
-    texture,
-    fSource,
-    uniforms
-  }, width, height) => {
-    fSource = fSource || shaderMap['ftexture'];
-
-    const textureUnit = 0;
-    
-    let res = this.makeQuad({
-      vSource: shaderMap['vtexture'],
-      fSource,
-      uniforms: {
-        ...uniforms,
-        uResolution: makeUniform2fSetter("uResolution"),
-        uMatrix: makeUniform3fvSetter("uMatrix"),
-        uTexture: makeUniform1iSetter("uTexture", textureUnit)
-      }
-    }, width, height);
-
-    let glTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, glTexture);
-
-    const format = gl.RGBA,
-          type = gl.UNSIGNED_BYTE;
-    gl.texImage2D(gl.TEXTURE_2D, 0, format, format, type, texture);
-    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
-    res = {
-      texture: glTexture,
-      textureUnit,
-      ...res
-    };
-
-    return res;    
   };
 
   this.render = () => {
@@ -230,28 +162,110 @@ export default function Graphics(state, gl) {
     this.minibatch.forEach(({
       program,
       uniforms,
+      textureInfos,
       vao,
-      texture,
-      textureUnit
+      numVertices
     }) => {
 
       gl.useProgram(program);
 
+      gl.bindVertexArray(vao);
+
+      textureInfos.forEach(({ glTexture, index }) => {
+        gl.uniform1i(index, 0);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, glTexture);
+      });
+
       uniforms.forEach(_ => _());
 
-
-      if (texture) {
-        gl.activeTexture(gl.TEXTURE0 + textureUnit);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-      }
-
-      gl.bindVertexArray(vao);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     });
 
     this.minibatch = [];
   };
 }
+
+const makeVao = (gl, bufferInfos) => {
+  let vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+
+  bufferInfos.forEach(({
+    buffer,
+    size,
+    index
+  }) => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+    gl.vertexAttribPointer(index,
+                           size,
+                           gl.FLOAT,
+                           false,
+                           0,
+                           0);
+    gl.enableVertexAttribArray(index);
+
+  });
+
+  gl.bindVertexArray(null);
+
+  return vao;
+};
+
+
+export function makeTextureInfoForUniform(name) {
+
+  let gl, glTexture;
+
+  this.apply = (_gl, program) => {
+    gl = _gl;
+    glTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, glTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
+
+    return {
+      glTexture,
+      index: gl.getUniformLocation(program, name)
+    };
+
+  };
+
+  this.set = (texture) => {
+    gl.bindTexture(gl.TEXTURE_2D, glTexture);
+
+    const format = gl.RGBA,
+          type = gl.UNSIGNED_BYTE;
+    gl.texImage2D(gl.TEXTURE_2D, 0, format, format, type, texture);
+
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+  };
+}
+
+export function makeBufferInfoForAttribute(name, size) {
+  let gl, buffer;
+
+  this.set = (array, drawType) => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(array), drawType);
+  },
+
+  this.apply = (_gl, program) => {
+    gl = _gl;
+    buffer = gl.createBuffer();
+    return {
+      buffer,
+      size,
+      index: gl.getAttribLocation(program, name)
+    };
+  };
+};
 
 export const makeUniform1iSetter = (name, args) => (gl, program) => () => gl.uniform1i(gl.getUniformLocation(program, name), args);
 

@@ -20,7 +20,7 @@ export default function view(ctrl, g, assets) {
     back.render(ctrl);
     play.render(ctrl);
     ui.render(ctrl);
-    // menu.render(ctrl);
+    //menu.render(ctrl);
   };
 
   this.release = () => {

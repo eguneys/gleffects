@@ -6,22 +6,24 @@ import * as G from '../graphics';
 
 export default function view(ctrl, g) {
 
-  const { width, height, textures } = ctrl.data;
+  const { width, height } = ctrl.data;
 
-  const mWidth = width * 0.2,
-        mHeight = height * 0.2;
-
-  let bgQuad = g.makeSprite({
-    texture: textures['scoreLabel']
-  }, mWidth, mHeight);
+  let heroQuad = g.makeQuad({
+    fSource: shaderMap['fwall'],
+    uniforms: {
+      uMatrix: G.makeUniform3fvSetter("uMatrix")
+    }
+  }, 20, 20);
+  
 
   this.render = ctrl => {
-    g.addTexture(bgQuad, {
-      translation: [(width-mWidth) / 2, (height - mHeight) / 2],
-      rotation: Math.PI * 0.0,
-      scale: [1.0, 1.0],
-      pivot: [width*0.5, height*0.5]
-    });    
+    g.addQuad(heroQuad, {
+      translation: [10, 10],
+      rotation: 0.1,
+      width: 20,
+      height: 20
+    });
+
   };
 
 }

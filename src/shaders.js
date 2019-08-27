@@ -5,6 +5,7 @@ import fHeroShader from './shaders/hero.frag';
 import fWallShader from './shaders/wall.frag';
 import vTextureShader from './shaders/texture.vert';
 import fTextureShader from './shaders/texture.frag';
+import vFontShader from './shaders/font.vert';
 
 import fBackgroundShader from './shaders/background.frag';
 
@@ -25,6 +26,7 @@ const partialShaders = {
 
 const rawShaders = {
   'vmain': vMainShader,
+  'vfont': vFontShader,
   'fhero': fHeroShader,
   'fwall': fWallShader,
   'vtexture': vTextureShader,

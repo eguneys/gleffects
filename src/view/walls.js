@@ -29,6 +29,8 @@ export default function view(ctrl, g) {
       const { x, y } = wallCtrl.data;
       let quad = wallQuads.acquire();
       g.addQuad(quad, {
+        width: wallWidth,
+        height: wallWidth,
         translation: [x - cameraX, y]
       });
     });
@@ -37,6 +39,8 @@ export default function view(ctrl, g) {
       const { x, y, rotation } = fallingCtrl.data;
       let quad = wallQuads.acquire();
       g.addQuad(quad, {
+        width: wallWidth,
+        height: wallWidth,
         translation: [x - cameraX, y],
         rotation
       });      
